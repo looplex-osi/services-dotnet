@@ -1,5 +1,5 @@
 {
-  "name": "open-for-extension-dotnet",
+  "name": "@looplex/services-dotnet",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
