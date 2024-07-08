@@ -14,68 +14,6 @@ namespace Looplex.DotNet.Middlewares.OAuth2.Services
     {
         private static readonly IList<Client> _clients = [];
 
-        public Task CreateAsync(IDefaultContext context)
-        {
-            var client = context.GetRequiredValue<Client>("Resource");
-            context.Plugins.Execute<IHandleInput>(context);
-
-            context.Plugins.Execute<IValidateInput>(context);
-
-            context.Actors.Add("Client", client);
-            context.Plugins.Execute<IDefineActors>(context);
-
-            context.Plugins.Execute<IBind>(context);
-
-            context.Plugins.Execute<IBeforeAction>(context);
-
-            if (!context.SkipDefaultAction)
-            {
-                var clientId = Guid.NewGuid();
-
-                context.Actors["Client"].Id = clientId.ToString();
-                _clients.Add(context.Actors["Client"]);
-
-                context.Result = clientId;
-            }
-
-            context.Plugins.Execute<IAfterAction>(context);
-
-            context.Plugins.Execute<IReleaseUnmanagedResources>(context);
-
-            return Task.CompletedTask;
-        }
-
-        public Task DeleteAsync(IDefaultContext context)
-        {
-            Guid id = context.GetRequiredValue<Guid>("Id");
-            context.Plugins.Execute<IHandleInput>(context);
-
-            var client = _clients.FirstOrDefault(c => c.Id == id.ToString());
-            if (client == null)
-            {
-                throw new EntityNotFoundException(nameof(Client), id.ToString());
-            }
-            context.Plugins.Execute<IValidateInput>(context);
-
-            context.Actors.Add("Client", client);
-            context.Plugins.Execute<IDefineActors>(context);
-
-            context.Plugins.Execute<IBind>(context);
-
-            context.Plugins.Execute<IBeforeAction>(context);
-
-            if (!context.SkipDefaultAction)
-            {
-                _clients.Remove(context.Actors["Client"]);
-            }
-
-            context.Plugins.Execute<IAfterAction>(context);
-
-            context.Plugins.Execute<IReleaseUnmanagedResources>(context);
-
-            return Task.CompletedTask;
-        }
-
         public Task GetAll(IDefaultContext context)
         {
             var page = context.GetRequiredValue<int>("Pagination.Page");
@@ -141,6 +79,68 @@ namespace Looplex.DotNet.Middlewares.OAuth2.Services
             if (!context.SkipDefaultAction)
             {
                 context.Result = context.Actors["Client"];
+            }
+
+            context.Plugins.Execute<IAfterAction>(context);
+
+            context.Plugins.Execute<IReleaseUnmanagedResources>(context);
+
+            return Task.CompletedTask;
+        }
+
+        public Task CreateAsync(IDefaultContext context)
+        {
+            var client = context.GetRequiredValue<Client>("Resource");
+            context.Plugins.Execute<IHandleInput>(context);
+
+            context.Plugins.Execute<IValidateInput>(context);
+
+            context.Actors.Add("Client", client);
+            context.Plugins.Execute<IDefineActors>(context);
+
+            context.Plugins.Execute<IBind>(context);
+
+            context.Plugins.Execute<IBeforeAction>(context);
+
+            if (!context.SkipDefaultAction)
+            {
+                var clientId = Guid.NewGuid();
+
+                context.Actors["Client"].Id = clientId.ToString();
+                _clients.Add(context.Actors["Client"]);
+
+                context.Result = clientId;
+            }
+
+            context.Plugins.Execute<IAfterAction>(context);
+
+            context.Plugins.Execute<IReleaseUnmanagedResources>(context);
+
+            return Task.CompletedTask;
+        }
+
+        public Task DeleteAsync(IDefaultContext context)
+        {
+            Guid id = context.GetRequiredValue<Guid>("Id");
+            context.Plugins.Execute<IHandleInput>(context);
+
+            var client = _clients.FirstOrDefault(c => c.Id == id.ToString());
+            if (client == null)
+            {
+                throw new EntityNotFoundException(nameof(Client), id.ToString());
+            }
+            context.Plugins.Execute<IValidateInput>(context);
+
+            context.Actors.Add("Client", client);
+            context.Plugins.Execute<IDefineActors>(context);
+
+            context.Plugins.Execute<IBind>(context);
+
+            context.Plugins.Execute<IBeforeAction>(context);
+
+            if (!context.SkipDefaultAction)
+            {
+                _clients.Remove(context.Actors["Client"]);
             }
 
             context.Plugins.Execute<IAfterAction>(context);

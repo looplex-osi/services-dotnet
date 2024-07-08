@@ -15,68 +15,6 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
     {
         private static readonly IList<User> _users = [];
 
-        public Task CreateAsync(IDefaultContext context)
-        {
-            var user = context.GetRequiredValue<User>("Resource");
-            context.Plugins.Execute<IHandleInput>(context);
-
-            context.Plugins.Execute<IValidateInput>(context);
-
-            context.Actors["User"] = user;
-            context.Plugins.Execute<IDefineActors>(context);
-
-            context.Plugins.Execute<IBind>(context);
-
-            context.Plugins.Execute<IBeforeAction>(context);
-
-            if (!context.SkipDefaultAction)
-            {
-                var userId = Guid.NewGuid();
-
-                context.Actors["User"].Id = userId.ToString();
-                _users.Add(context.Actors["User"]);
-
-                context.Result = userId;
-            }
-
-            context.Plugins.Execute<IAfterAction>(context);
-
-            context.Plugins.Execute<IReleaseUnmanagedResources>(context);
-
-            return Task.CompletedTask;
-        }
-
-        public Task DeleteAsync(IDefaultContext context)
-        {
-            var id = context.GetRequiredValue<Guid>("Id");
-            context.Plugins.Execute<IHandleInput>(context);
-
-            var user = _users.FirstOrDefault(u => u.Id == id.ToString());
-            if (user == null)
-            {
-                throw new EntityNotFoundException(nameof(User), id.ToString());
-            }
-            context.Plugins.Execute<IValidateInput>(context);
-
-            context.Actors["User"] = user;
-            context.Plugins.Execute<IDefineActors>(context);
-
-            context.Plugins.Execute<IBind>(context);
-
-            context.Plugins.Execute<IBeforeAction>(context);
-
-            if (!context.SkipDefaultAction)
-            {
-                _users.Remove(context.Actors["User"]);
-            }
-
-            context.Plugins.Execute<IAfterAction>(context);
-
-            context.Plugins.Execute<IReleaseUnmanagedResources>(context);
-
-            return Task.CompletedTask;
-        }
-
         public Task GetAll(IDefaultContext context)
         {
             var page = context.GetRequiredValue<int>("Pagination.Page");
@@ -138,6 +76,68 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
             if (!context.SkipDefaultAction)
             {
                 context.Result = context.Actors["User"];
+            }
+
+            context.Plugins.Execute<IAfterAction>(context);
+
+            context.Plugins.Execute<IReleaseUnmanagedResources>(context);
+
+            return Task.CompletedTask;
+        }
+        
+        public Task CreateAsync(IDefaultContext context)
+        {
+            var user = context.GetRequiredValue<User>("Resource");
+            context.Plugins.Execute<IHandleInput>(context);
+
+            context.Plugins.Execute<IValidateInput>(context);
+
+            context.Actors["User"] = user;
+            context.Plugins.Execute<IDefineActors>(context);
+
+            context.Plugins.Execute<IBind>(context);
+
+            context.Plugins.Execute<IBeforeAction>(context);
+
+            if (!context.SkipDefaultAction)
+            {
+                var userId = Guid.NewGuid();
+
+                context.Actors["User"].Id = userId.ToString();
+                _users.Add(context.Actors["User"]);
+
+                context.Result = userId;
+            }
+
+            context.Plugins.Execute<IAfterAction>(context);
+
+            context.Plugins.Execute<IReleaseUnmanagedResources>(context);
+
+            return Task.CompletedTask;
+        }
+
+        public Task DeleteAsync(IDefaultContext context)
+        {
+            var id = context.GetRequiredValue<Guid>("Id");
+            context.Plugins.Execute<IHandleInput>(context);
+
+            var user = _users.FirstOrDefault(u => u.Id == id.ToString());
+            if (user == null)
+            {
+                throw new EntityNotFoundException(nameof(User), id.ToString());
+            }
+            context.Plugins.Execute<IValidateInput>(context);
+
+            context.Actors["User"] = user;
+            context.Plugins.Execute<IDefineActors>(context);
+
+            context.Plugins.Execute<IBind>(context);
+
+            context.Plugins.Execute<IBeforeAction>(context);
+
+            if (!context.SkipDefaultAction)
+            {
+                _users.Remove(context.Actors["User"]);
             }
 
             context.Plugins.Execute<IAfterAction>(context);
