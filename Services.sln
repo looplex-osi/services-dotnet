@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.34928.147
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D3F24E77-7813-4E28-8195-702EADEC1573}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{30A93E4A-33D2-459C-8911-3A3327F08543}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Looplex.DotNet.Services.Clients.InMemory", "src\Looplex.DotNet.Services.Clients.InMemory\Looplex.DotNet.Services.Clients.InMemory.csproj", "{D2054BFA-7598-4964-BDA8-49D2C655ACF7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Looplex.DotNet.Services.ScimV2.InMemory", "src\Looplex.DotNet.Services.ScimV2.InMemory\Looplex.DotNet.Services.ScimV2.InMemory.csproj", "{528A6F2D-0EA1-408C-BFBF-4B084EBA35C7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D2054BFA-7598-4964-BDA8-49D2C655ACF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2054BFA-7598-4964-BDA8-49D2C655ACF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2054BFA-7598-4964-BDA8-49D2C655ACF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2054BFA-7598-4964-BDA8-49D2C655ACF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{528A6F2D-0EA1-408C-BFBF-4B084EBA35C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{528A6F2D-0EA1-408C-BFBF-4B084EBA35C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{528A6F2D-0EA1-408C-BFBF-4B084EBA35C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{528A6F2D-0EA1-408C-BFBF-4B084EBA35C7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D2054BFA-7598-4964-BDA8-49D2C655ACF7} = {D3F24E77-7813-4E28-8195-702EADEC1573}
+		{528A6F2D-0EA1-408C-BFBF-4B084EBA35C7} = {D3F24E77-7813-4E28-8195-702EADEC1573}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8113699D-9BAD-41E1-A9A8-FA3CF7718C2C}
+	EndGlobalSection
+EndGlobal

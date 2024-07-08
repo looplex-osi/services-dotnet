@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<IsPackable>true</IsPackable>
+	<PackageId>Looplex.DotNet.Services.Clients.InMemory</PackageId>
+	<Authors>Guilherme Câmara</Authors>
+	<Company>Looplex</Company>
+	<PackageTags>Looplex;Middleware;Clients;InMemory</PackageTags>
+	<Description>
+		Contains a in memory implementation for the ClientCredential resource type.
+	</Description>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+	<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+  </PropertyGroup>
+	
+  <Target Name="PostPackNugetDeploy" AfterTargets="Pack" Condition="'$(Configuration)' == 'Debug'">
+    <Exec Command="nuget add &quot;$(OutputPath)$(PackageId).$(PackageVersion).nupkg&quot; -source C:\local-nuget-feed" />
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="Looplex.DotNet.Middlewares.Clients" Version="1.0.4" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
+  </ItemGroup>
+
+</Project>
