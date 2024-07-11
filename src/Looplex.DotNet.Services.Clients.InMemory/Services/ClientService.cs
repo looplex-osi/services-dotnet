@@ -150,11 +150,32 @@ namespace Looplex.DotNet.Middlewares.OAuth2.Services
             return Task.CompletedTask;
         }
 
-        public Task<IClient?> GetByIdAndSecretOrDefaultAsync(Guid id, string secret)
+        public Task GetByIdAndSecretOrDefaultAsync(IDefaultContext context)
         {
-            var client = _clients.FirstOrDefault(c => Guid.Parse(c.Id) == id && c.Secret == secret);
+            Guid id = context.State.ClientId;
+            string secret = context.State.ClientSecret;
+            context.Plugins.Execute<IHandleInput>(context);
 
-            return Task.FromResult((IClient?)client);
+            var client = _clients.FirstOrDefault(c => Guid.Parse(c.Id) == id && c.Secret == secret);
+            context.Plugins.Execute<IValidateInput>(context);
+
+            context.Actors.Add("Client", client);
+            context.Plugins.Execute<IDefineActors>(context);
+
+            context.Plugins.Execute<IBind>(context);
+
+            context.Plugins.Execute<IBeforeAction>(context);
+
+            if (!context.SkipDefaultAction)
+            {
+                context.Result = client;
+            }
+
+            context.Plugins.Execute<IAfterAction>(context);
+
+            context.Plugins.Execute<IReleaseUnmanagedResources>(context);
+            
+            return Task.CompletedTask;
         }
     }
 }

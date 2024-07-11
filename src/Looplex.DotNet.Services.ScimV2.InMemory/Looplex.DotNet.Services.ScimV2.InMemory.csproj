@@ -22,7 +22,7 @@
   </Target>
 
   <ItemGroup>
-	<PackageReference Include="Looplex.DotNet.Middlewares.Clients" Version="1.0.5" />
+	<PackageReference Include="Looplex.DotNet.Middlewares.Clients" Version="1.0.8" />
 	<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
   </ItemGroup>
 
