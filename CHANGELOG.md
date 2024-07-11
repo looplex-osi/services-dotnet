@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="1.0.3"></a>
+## [1.0.3](https://www.github.com/looplex-osi/services-dotnet/releases/tag/v1.0.3) (2024-07-11)
+
+### Bug Fixes
+
+* upgrade middleware pkg to 1.0.9 ([e0a7a5c](https://www.github.com/looplex-osi/services-dotnet/commit/e0a7a5cf1155776e523b47b740ce8517ed0be689))
+
 <a name="1.0.2"></a>
 ## [1.0.2](https://www.github.com/looplex-osi/services-dotnet/releases/tag/v1.0.2) (2024-07-11)
 
