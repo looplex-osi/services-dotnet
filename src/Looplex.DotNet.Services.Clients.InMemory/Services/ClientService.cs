@@ -3,7 +3,6 @@ using Looplex.DotNet.Core.Common.Exceptions;
 using Looplex.DotNet.Core.Common.Utils;
 using Looplex.DotNet.Core.Domain;
 using Looplex.DotNet.Middlewares.Clients.Entities;
-using Looplex.DotNet.Middlewares.OAuth2.Entities;
 using Looplex.OpenForExtension.Commands;
 using Looplex.OpenForExtension.Context;
 using Looplex.OpenForExtension.ExtensionMethods;
@@ -14,7 +13,7 @@ namespace Looplex.DotNet.Middlewares.OAuth2.Services
     {
         private static readonly IList<Client> _clients = [];
 
-        public Task GetAll(IDefaultContext context)
+        public Task GetAllAsync(IDefaultContext context)
         {
             var page = context.GetRequiredValue<int>("Pagination.Page");
             var perPage = context.GetRequiredValue<int>("Pagination.PerPage");
@@ -57,7 +56,7 @@ namespace Looplex.DotNet.Middlewares.OAuth2.Services
             return Task.CompletedTask;
         }
 
-        public Task GetAsync(IDefaultContext context)
+        public Task GetByIdAsync(IDefaultContext context)
         {
             Guid id = context.GetRequiredValue<Guid>("Id");
             context.Plugins.Execute<IHandleInput>(context);

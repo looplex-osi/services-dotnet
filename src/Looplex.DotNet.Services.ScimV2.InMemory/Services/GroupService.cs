@@ -14,7 +14,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
     {
         private static readonly IList<Group> _groups = []; 
         
-        public Task GetAll(IDefaultContext context)
+        public Task GetAllAsync(IDefaultContext context)
         {
             context.Plugins.Execute<IHandleInput>(context);
             var page = context.GetRequiredValue<int>("Pagination.Page");
@@ -53,7 +53,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
             return Task.CompletedTask;
         }
 
-        public Task GetAsync(IDefaultContext context)
+        public Task GetByIdAsync(IDefaultContext context)
         {
             Guid id = context.GetRequiredValue<Guid>("Id");
             context.Plugins.Execute<IHandleInput>(context);
