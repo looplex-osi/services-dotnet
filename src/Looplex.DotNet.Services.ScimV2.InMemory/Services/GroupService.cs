@@ -55,7 +55,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
 
         public Task GetByIdAsync(IDefaultContext context)
         {
-            Guid id = context.GetRequiredValue<Guid>("Id");
+            var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
             context.Plugins.Execute<IHandleInput>(context);
 
             var group = _groups.FirstOrDefault(g => g.Id == id.ToString());
@@ -117,7 +117,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
 
         public Task DeleteAsync(IDefaultContext context)
         {
-            var id = context.GetRequiredValue<Guid>("Id");
+            var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
             context.Plugins.Execute<IHandleInput>(context);
 
             var group = _groups.FirstOrDefault(g => g.Id == id.ToString());

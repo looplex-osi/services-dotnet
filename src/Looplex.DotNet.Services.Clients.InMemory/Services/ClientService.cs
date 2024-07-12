@@ -58,7 +58,7 @@ namespace Looplex.DotNet.Middlewares.OAuth2.Services
 
         public Task GetByIdAsync(IDefaultContext context)
         {
-            Guid id = context.GetRequiredValue<Guid>("Id");
+            var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
             context.Plugins.Execute<IHandleInput>(context);
 
             var client = _clients.FirstOrDefault(c => c.Id == id.ToString());
@@ -120,7 +120,7 @@ namespace Looplex.DotNet.Middlewares.OAuth2.Services
 
         public Task DeleteAsync(IDefaultContext context)
         {
-            Guid id = context.GetRequiredValue<Guid>("Id");
+            var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
             context.Plugins.Execute<IHandleInput>(context);
 
             var client = _clients.FirstOrDefault(c => c.Id == id.ToString());
@@ -128,6 +128,7 @@ namespace Looplex.DotNet.Middlewares.OAuth2.Services
             {
                 throw new EntityNotFoundException(nameof(Client), id.ToString());
             }
+
             context.Plugins.Execute<IValidateInput>(context);
 
             context.Actors.Add("Client", client);
