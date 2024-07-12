@@ -167,7 +167,7 @@ namespace Looplex.DotNet.Middlewares.OAuth2.Services
 
             if (!context.SkipDefaultAction)
             {
-                context.Result = client;
+                context.Result = context.Actors["Client"];
             }
 
             context.Plugins.Execute<IAfterAction>(context);
