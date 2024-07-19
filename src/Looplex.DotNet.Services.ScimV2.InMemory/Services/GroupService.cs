@@ -1,26 +1,21 @@
-﻿using AutoMapper;
-using Looplex.DotNet.Core.Application.Abstractions.Dtos;
-using Looplex.DotNet.Core.Application.ExtensionMethods;
+﻿using Looplex.DotNet.Core.Application.ExtensionMethods;
 using Looplex.DotNet.Core.Common.Exceptions;
 using Looplex.DotNet.Core.Common.Utils;
 using Looplex.DotNet.Core.Domain;
-using Looplex.DotNet.Middlewares.ScimV2.Dtos.Groups;
-using Looplex.DotNet.Middlewares.ScimV2.Entities;
-using Looplex.DotNet.Middlewares.ScimV2.Entities.Groups;
-using Looplex.DotNet.Middlewares.ScimV2.Services;
+using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Services;
+using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
+using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Groups;
 using Looplex.OpenForExtension.Commands;
 using Looplex.OpenForExtension.Context;
 using Looplex.OpenForExtension.ExtensionMethods;
 
 namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
 {
-    public class GroupService(IMapper mapper) : IGroupService
+    public class GroupService() : IGroupService
     {
-        private static readonly IList<Group> _groups = []; 
+        private static readonly IList<Group> _groups = [];
         
-        private readonly IMapper _mapper = mapper;
-        
-        public Task GetAllAsync(IDefaultContext context)
+        public Task GetAllAsync(IDefaultContext context, CancellationToken cancellationToken)
         {
             context.Plugins.Execute<IHandleInput>(context);
             var page = context.GetRequiredValue<int>("Pagination.Page");
@@ -41,15 +36,16 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
                     .Take(perPage)
                     .ToList();
 
-                var result = new PaginatedCollection<Group>
+                var result = new PaginatedCollection
                 {
-                    Records = records,
+                    Records = records.Select(r => (object)r).ToList(),
                     Page = page,
                     PerPage = perPage,
                     TotalCount = _groups.Count
                 };
-
-                context.Result = _mapper.Map<PaginatedCollection<Group>, PaginatedCollectionDto<GroupReadDto>>(result);
+                context.State.Pagination.TotalCount = _groups.Count;
+                
+                context.Result = result.ToJson(Group.Converter.Settings);
             }
 
             context.Plugins.Execute<IAfterAction>(context);
@@ -59,7 +55,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
             return Task.CompletedTask;
         }
 
-        public Task GetByIdAsync(IDefaultContext context)
+        public Task GetByIdAsync(IDefaultContext context, CancellationToken cancellationToken)
         {
             var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
             context.Plugins.Execute<IHandleInput>(context);
@@ -80,7 +76,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
 
             if (!context.SkipDefaultAction)
             {
-                context.Result = _mapper.Map<Group, GroupReadDto>(context.Actors["Group"]);
+                context.Result = ((Group)context.Actors["Group"]).ToJson();
             }
 
             context.Plugins.Execute<IAfterAction>(context);
@@ -90,7 +86,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
             return Task.CompletedTask;
         }
         
-        public Task CreateAsync(IDefaultContext context)
+        public Task CreateAsync(IDefaultContext context, CancellationToken cancellationToken)
         {
             var json = context.GetRequiredValue<string>("Resource");
             var group = Resource.FromJson<Group>(json, out var messages);
@@ -98,7 +94,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
 
             if (messages.Count > 0)
             {
-                throw new EntityInvalidExcepion(messages.ToList());
+                throw new EntityInvalidException(messages.ToList());
             }
             context.Plugins.Execute<IValidateInput>(context);
 
@@ -126,7 +122,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
             return Task.CompletedTask;
         }
 
-        public Task DeleteAsync(IDefaultContext context)
+        public Task DeleteAsync(IDefaultContext context, CancellationToken cancellationToken)
         {
             var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
             context.Plugins.Execute<IHandleInput>(context);

@@ -25,8 +25,11 @@
  </Target>
 
   <ItemGroup>
-    <PackageReference Include="Looplex.DotNet.Middlewares.Clients" Version="1.0.14" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
+      <PackageReference Include="Looplex.DotNet.Core.Common" Version="1.0.13" />
+      <PackageReference Include="Looplex.DotNet.Core.Application" Version="1.0.13" />
+      <PackageReference Include="Looplex.DotNet.Middlewares.Clients.Domain" Version="1.0.18" />
+      <PackageReference Include="Looplex.DotNet.Middlewares.Clients.Application.Abstractions" Version="1.0.18" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
   </ItemGroup>
 
 </Project>

@@ -1,26 +1,21 @@
-﻿using AutoMapper;
-using Looplex.DotNet.Core.Application.Abstractions.Dtos;
-using Looplex.DotNet.Core.Application.ExtensionMethods;
+﻿using Looplex.DotNet.Core.Application.ExtensionMethods;
 using Looplex.DotNet.Core.Common.Exceptions;
 using Looplex.DotNet.Core.Common.Utils;
 using Looplex.DotNet.Core.Domain;
-using Looplex.DotNet.Middlewares.ScimV2.Dtos.Users;
-using Looplex.DotNet.Middlewares.ScimV2.Entities;
-using Looplex.DotNet.Middlewares.ScimV2.Entities.Users;
-using Looplex.DotNet.Middlewares.ScimV2.Services;
+using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Services;
+using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
+using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Users;
 using Looplex.OpenForExtension.Commands;
 using Looplex.OpenForExtension.Context;
 using Looplex.OpenForExtension.ExtensionMethods;
 
 namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
 {
-    public class UserService(IMapper mapper) : IUserService
+    public class UserService() : IUserService
     {
         private static readonly IList<User> _users = [];
-        
-        private readonly IMapper _mapper = mapper;
 
-        public Task GetAllAsync(IDefaultContext context)
+        public Task GetAllAsync(IDefaultContext context, CancellationToken cancellationToken)
         {
             var page = context.GetRequiredValue<int>("Pagination.Page");
             var perPage = context.GetRequiredValue<int>("Pagination.PerPage");
@@ -41,15 +36,16 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
                     .Take(perPage)
                     .ToList();
 
-                var result = new PaginatedCollection<User>
+                var result = new PaginatedCollection
                 {
-                    Records = records,
+                    Records = records.Select(r => (object)r).ToList(),
                     Page = page,
                     PerPage = perPage,
                     TotalCount = _users.Count
                 };
-
-                context.Result = _mapper.Map<PaginatedCollection<User>, PaginatedCollectionDto<UserReadDto>>(result);
+                context.State.Pagination.TotalCount = _users.Count;
+                
+                context.Result = result.ToJson(User.Converter.Settings);
             }
 
             context.Plugins.Execute<IAfterAction>(context);
@@ -59,7 +55,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
             return Task.CompletedTask;
         }
 
-        public Task GetByIdAsync(IDefaultContext context)
+        public Task GetByIdAsync(IDefaultContext context, CancellationToken cancellationToken)
         {
             var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
             context.Plugins.Execute<IHandleInput>(context);
@@ -80,7 +76,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
 
             if (!context.SkipDefaultAction)
             {
-                context.Result = _mapper.Map<User, UserReadDto>(context.Actors["User"]);
+                context.Result = ((User)context.Actors["User"]).ToJson();
             }
 
             context.Plugins.Execute<IAfterAction>(context);
@@ -90,7 +86,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
             return Task.CompletedTask;
         }
         
-        public Task CreateAsync(IDefaultContext context)
+        public Task CreateAsync(IDefaultContext context, CancellationToken cancellationToken)
         {
             var json = context.GetRequiredValue<string>("Resource");
             var user = Resource.FromJson<User>(json, out var messages);
@@ -98,7 +94,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
 
             if (messages.Count > 0)
             {
-                throw new EntityInvalidExcepion(messages.ToList());
+                throw new EntityInvalidException(messages.ToList());
             }
             context.Plugins.Execute<IValidateInput>(context);
 
@@ -126,7 +122,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
             return Task.CompletedTask;
         }
 
-        public Task DeleteAsync(IDefaultContext context)
+        public Task DeleteAsync(IDefaultContext context, CancellationToken cancellationToken)
         {
             var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
             context.Plugins.Execute<IHandleInput>(context);

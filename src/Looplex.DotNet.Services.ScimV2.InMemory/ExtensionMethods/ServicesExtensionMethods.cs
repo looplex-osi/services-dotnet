@@ -1,5 +1,4 @@
-﻿using Looplex.DotNet.Middlewares.ScimV2.Services;
-using Looplex.DotNet.Services.ScimV2.InMemory.Profiles;
+﻿using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Services;
 using Looplex.DotNet.Services.ScimV2.InMemory.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,11 +10,6 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.ExtensionMethods
         {
             services.AddSingleton<IGroupService, GroupService>();
             services.AddSingleton<IUserService, UserService>();
-        }
-
-        public static void AddScimV2InMemoryAutoMapper(this IServiceCollection services)
-        {
-            services.AddAutoMapper(typeof(ScimV2InMemoryProfile));
         }
     }
 }
