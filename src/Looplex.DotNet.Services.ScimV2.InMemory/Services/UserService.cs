@@ -1,19 +1,24 @@
-﻿using Looplex.DotNet.Core.Application.ExtensionMethods;
+﻿using AutoMapper;
+using Looplex.DotNet.Core.Application.Abstractions.Dtos;
+using Looplex.DotNet.Core.Application.ExtensionMethods;
 using Looplex.DotNet.Core.Common.Exceptions;
 using Looplex.DotNet.Core.Common.Utils;
 using Looplex.DotNet.Core.Domain;
+using Looplex.DotNet.Middlewares.ScimV2.Dtos.Users;
+using Looplex.DotNet.Middlewares.ScimV2.Entities;
 using Looplex.DotNet.Middlewares.ScimV2.Entities.Users;
 using Looplex.DotNet.Middlewares.ScimV2.Services;
 using Looplex.OpenForExtension.Commands;
 using Looplex.OpenForExtension.Context;
 using Looplex.OpenForExtension.ExtensionMethods;
-using MassTransit;
 
 namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
 {
-    public class UserService(IBus bus) : IUserService
+    public class UserService(IMapper mapper) : IUserService
     {
         private static readonly IList<User> _users = [];
+        
+        private readonly IMapper _mapper = mapper;
 
         public Task GetAllAsync(IDefaultContext context)
         {
@@ -44,7 +49,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
                     TotalCount = _users.Count
                 };
 
-                context.Result = result;
+                context.Result = _mapper.Map<PaginatedCollection<User>, PaginatedCollectionDto<UserReadDto>>(result);
             }
 
             context.Plugins.Execute<IAfterAction>(context);
@@ -75,7 +80,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
 
             if (!context.SkipDefaultAction)
             {
-                context.Result = context.Actors["User"];
+                context.Result = _mapper.Map<User, UserReadDto>(context.Actors["User"]);
             }
 
             context.Plugins.Execute<IAfterAction>(context);
@@ -87,9 +92,14 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
         
         public Task CreateAsync(IDefaultContext context)
         {
-            var user = context.GetRequiredValue<User>("Resource");
+            var json = context.GetRequiredValue<string>("Resource");
+            var user = Resource.FromJson<User>(json, out var messages);
             context.Plugins.Execute<IHandleInput>(context);
 
+            if (messages.Count > 0)
+            {
+                throw new EntityInvalidExcepion(messages.ToList());
+            }
             context.Plugins.Execute<IValidateInput>(context);
 
             context.Actors["User"] = user;

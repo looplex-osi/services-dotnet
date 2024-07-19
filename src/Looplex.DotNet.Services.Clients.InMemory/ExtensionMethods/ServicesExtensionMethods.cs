@@ -1,8 +1,9 @@
 ﻿using Looplex.DotNet.Middlewares.OAuth2.Services;
-using Looplex.DotNet.Middlewares.OAuth2.Storages.InMemory;
+using Looplex.DotNet.Services.Clients.InMemory.Profiles;
+using Looplex.DotNet.Services.Clients.InMemory.Services;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Looplex.DotNet.Middlewares.OAuth2.Storages.Default.ExtensionMethods
+namespace Looplex.DotNet.Services.Clients.InMemory.ExtensionMethods
 {
     public static class ServicesExtensionMethods
     {

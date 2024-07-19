@@ -1,7 +1,11 @@
-﻿using Looplex.DotNet.Core.Application.ExtensionMethods;
+﻿using AutoMapper;
+using Looplex.DotNet.Core.Application.Abstractions.Dtos;
+using Looplex.DotNet.Core.Application.ExtensionMethods;
 using Looplex.DotNet.Core.Common.Exceptions;
 using Looplex.DotNet.Core.Common.Utils;
 using Looplex.DotNet.Core.Domain;
+using Looplex.DotNet.Middlewares.ScimV2.Dtos.Groups;
+using Looplex.DotNet.Middlewares.ScimV2.Entities;
 using Looplex.DotNet.Middlewares.ScimV2.Entities.Groups;
 using Looplex.DotNet.Middlewares.ScimV2.Services;
 using Looplex.OpenForExtension.Commands;
@@ -10,9 +14,11 @@ using Looplex.OpenForExtension.ExtensionMethods;
 
 namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
 {
-    public class GroupService : IGroupService
+    public class GroupService(IMapper mapper) : IGroupService
     {
         private static readonly IList<Group> _groups = []; 
+        
+        private readonly IMapper _mapper = mapper;
         
         public Task GetAllAsync(IDefaultContext context)
         {
@@ -43,7 +49,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
                     TotalCount = _groups.Count
                 };
 
-                context.Result = result;
+                context.Result = _mapper.Map<PaginatedCollection<Group>, PaginatedCollectionDto<GroupReadDto>>(result);
             }
 
             context.Plugins.Execute<IAfterAction>(context);
@@ -74,7 +80,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
 
             if (!context.SkipDefaultAction)
             {
-                context.Result = context.Actors["Group"];
+                context.Result = _mapper.Map<Group, GroupReadDto>(context.Actors["Group"]);
             }
 
             context.Plugins.Execute<IAfterAction>(context);
@@ -86,9 +92,14 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
         
         public Task CreateAsync(IDefaultContext context)
         {
-            var group = context.GetRequiredValue<Group>("Resource");
+            var json = context.GetRequiredValue<string>("Resource");
+            var group = Resource.FromJson<Group>(json, out var messages);
             context.Plugins.Execute<IHandleInput>(context);
 
+            if (messages.Count > 0)
+            {
+                throw new EntityInvalidExcepion(messages.ToList());
+            }
             context.Plugins.Execute<IValidateInput>(context);
 
             context.Actors.Add("Group", group);
