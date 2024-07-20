@@ -5,9 +5,9 @@ using Looplex.DotNet.Core.Domain;
 using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Services;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Groups;
-using Looplex.OpenForExtension.Commands;
-using Looplex.OpenForExtension.Context;
-using Looplex.OpenForExtension.ExtensionMethods;
+using Looplex.OpenForExtension.Abstractions.Commands;
+using Looplex.OpenForExtension.Abstractions.Contexts;
+using Looplex.OpenForExtension.Abstractions.ExtensionMethods;
 
 namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
 {
@@ -15,19 +15,21 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
     {
         private static readonly IList<Group> _groups = [];
         
-        public Task GetAllAsync(IDefaultContext context, CancellationToken cancellationToken)
+        public Task GetAllAsync(IContext context, CancellationToken cancellationToken)
         {
-            context.Plugins.Execute<IHandleInput>(context);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            context.Plugins.Execute<IHandleInput>(context, cancellationToken);
             var page = context.GetRequiredValue<int>("Pagination.Page");
             var perPage = context.GetRequiredValue<int>("Pagination.PerPage");
 
-            context.Plugins.Execute<IValidateInput>(context);
+            context.Plugins.Execute<IValidateInput>(context, cancellationToken);
 
-            context.Plugins.Execute<IDefineActors>(context);
+            context.Plugins.Execute<IDefineRoles>(context, cancellationToken);
 
-            context.Plugins.Execute<IBind>(context);
+            context.Plugins.Execute<IBind>(context, cancellationToken);
 
-            context.Plugins.Execute<IBeforeAction>(context);
+            context.Plugins.Execute<IBeforeAction>(context, cancellationToken);
 
             if (!context.SkipDefaultAction)
             {
@@ -48,107 +50,113 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
                 context.Result = result.ToJson(Group.Converter.Settings);
             }
 
-            context.Plugins.Execute<IAfterAction>(context);
+            context.Plugins.Execute<IAfterAction>(context, cancellationToken);
 
-            context.Plugins.Execute<IReleaseUnmanagedResources>(context);
+            context.Plugins.Execute<IReleaseUnmanagedResources>(context, cancellationToken);
 
             return Task.CompletedTask;
         }
 
-        public Task GetByIdAsync(IDefaultContext context, CancellationToken cancellationToken)
+        public Task GetByIdAsync(IContext context, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
-            context.Plugins.Execute<IHandleInput>(context);
+            context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
             var group = _groups.FirstOrDefault(g => g.Id == id.ToString());
             if (group == null)
             {
                 throw new EntityNotFoundException(nameof(Group), id.ToString());
             }
-            context.Plugins.Execute<IValidateInput>(context);
+            context.Plugins.Execute<IValidateInput>(context, cancellationToken);
             
-            context.Actors.Add("Group", group);
-            context.Plugins.Execute<IDefineActors>(context);
+            context.Roles.Add("Group", group);
+            context.Plugins.Execute<IDefineRoles>(context, cancellationToken);
 
-            context.Plugins.Execute<IBind>(context);
+            context.Plugins.Execute<IBind>(context, cancellationToken);
 
-            context.Plugins.Execute<IBeforeAction>(context);
+            context.Plugins.Execute<IBeforeAction>(context, cancellationToken);
 
             if (!context.SkipDefaultAction)
             {
-                context.Result = ((Group)context.Actors["Group"]).ToJson();
+                context.Result = ((Group)context.Roles["Group"]).ToJson();
             }
 
-            context.Plugins.Execute<IAfterAction>(context);
+            context.Plugins.Execute<IAfterAction>(context, cancellationToken);
 
-            context.Plugins.Execute<IReleaseUnmanagedResources>(context);
+            context.Plugins.Execute<IReleaseUnmanagedResources>(context, cancellationToken);
 
             return Task.CompletedTask;
         }
         
-        public Task CreateAsync(IDefaultContext context, CancellationToken cancellationToken)
+        public Task CreateAsync(IContext context, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var json = context.GetRequiredValue<string>("Resource");
             var group = Resource.FromJson<Group>(json, out var messages);
-            context.Plugins.Execute<IHandleInput>(context);
+            context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
             if (messages.Count > 0)
             {
                 throw new EntityInvalidException(messages.ToList());
             }
-            context.Plugins.Execute<IValidateInput>(context);
+            context.Plugins.Execute<IValidateInput>(context, cancellationToken);
 
-            context.Actors.Add("Group", group);
-            context.Plugins.Execute<IDefineActors>(context);
+            context.Roles.Add("Group", group);
+            context.Plugins.Execute<IDefineRoles>(context, cancellationToken);
 
-            context.Plugins.Execute<IBind>(context);
+            context.Plugins.Execute<IBind>(context, cancellationToken);
 
-            context.Plugins.Execute<IBeforeAction>(context);
+            context.Plugins.Execute<IBeforeAction>(context, cancellationToken);
 
             if (!context.SkipDefaultAction)
             {
                 var groupId = Guid.NewGuid();
 
-                context.Actors["Group"].Id = groupId.ToString();
-                _groups.Add(context.Actors["Group"]);
+                context.Roles["Group"].Id = groupId.ToString();
+                _groups.Add(context.Roles["Group"]);
 
                 context.Result = groupId;
             }
 
-            context.Plugins.Execute<IAfterAction>(context);
+            context.Plugins.Execute<IAfterAction>(context, cancellationToken);
 
-            context.Plugins.Execute<IReleaseUnmanagedResources>(context);
+            context.Plugins.Execute<IReleaseUnmanagedResources>(context, cancellationToken);
 
             return Task.CompletedTask;
         }
 
-        public Task DeleteAsync(IDefaultContext context, CancellationToken cancellationToken)
+        public Task DeleteAsync(IContext context, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
-            context.Plugins.Execute<IHandleInput>(context);
+            context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
             var group = _groups.FirstOrDefault(g => g.Id == id.ToString());
             if (group == null)
             {
                 throw new EntityNotFoundException(nameof(Group), id.ToString());
             }
-            context.Plugins.Execute<IValidateInput>(context);
+            context.Plugins.Execute<IValidateInput>(context, cancellationToken);
 
-            context.Actors.Add("Group", group);
-            context.Plugins.Execute<IDefineActors>(context);
+            context.Roles.Add("Group", group);
+            context.Plugins.Execute<IDefineRoles>(context, cancellationToken);
 
-            context.Plugins.Execute<IBind>(context);
+            context.Plugins.Execute<IBind>(context, cancellationToken);
 
-            context.Plugins.Execute<IBeforeAction>(context);
+            context.Plugins.Execute<IBeforeAction>(context, cancellationToken);
 
             if (!context.SkipDefaultAction)
             {
-                _groups.Remove(context.Actors["Group"]);
+                _groups.Remove(context.Roles["Group"]);
             }
 
-            context.Plugins.Execute<IAfterAction>(context);
+            context.Plugins.Execute<IAfterAction>(context, cancellationToken);
 
-            context.Plugins.Execute<IReleaseUnmanagedResources>(context);
+            context.Plugins.Execute<IReleaseUnmanagedResources>(context, cancellationToken);
 
             return Task.CompletedTask;
         }

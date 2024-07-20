@@ -25,10 +25,10 @@
   </Target>
 
   <ItemGroup>
-	  <PackageReference Include="Looplex.DotNet.Core.Common" Version="1.0.13" />
-	  <PackageReference Include="Looplex.DotNet.Core.Application" Version="1.0.13" />
-	  <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2.Domain" Version="1.0.19" />
-	  <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions" Version="1.0.19" />
+	  <PackageReference Include="Looplex.DotNet.Core.Common" Version="1.0.15" />
+	  <PackageReference Include="Looplex.DotNet.Core.Application" Version="1.0.15" />
+	  <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2.Domain" Version="1.0.21" />
+	  <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions" Version="1.0.21" />
 	  <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
   </ItemGroup>
 
