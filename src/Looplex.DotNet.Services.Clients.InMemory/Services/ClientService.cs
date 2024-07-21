@@ -113,12 +113,9 @@ namespace Looplex.DotNet.Services.Clients.InMemory.Services
 
             if (!context.SkipDefaultAction)
             {
-                var clientId = Guid.NewGuid();
-
-                context.Roles["Client"].Id = clientId.ToString();
                 _clients.Add(context.Roles["Client"]);
 
-                context.Result = clientId;
+                context.Result = context.Roles["Client"].Id;
             }
 
             context.Plugins.Execute<IAfterAction>(context, cancellationToken);
@@ -140,7 +137,6 @@ namespace Looplex.DotNet.Services.Clients.InMemory.Services
             {
                 throw new EntityNotFoundException(nameof(Client), id.ToString());
             }
-
             context.Plugins.Execute<IValidateInput>(context, cancellationToken);
 
             context.Roles.Add("Client", client);
@@ -173,7 +169,10 @@ namespace Looplex.DotNet.Services.Clients.InMemory.Services
             var client = _clients.FirstOrDefault(c => Guid.Parse(c.Id) == id && c.Secret == secret);
             context.Plugins.Execute<IValidateInput>(context, cancellationToken);
 
-            context.Roles.Add("Client", client);
+            if (client != null)
+            {
+                context.Roles.Add("Client", client);
+            }
             context.Plugins.Execute<IDefineRoles>(context, cancellationToken);
 
             context.Plugins.Execute<IBind>(context, cancellationToken);
@@ -182,7 +181,10 @@ namespace Looplex.DotNet.Services.Clients.InMemory.Services
 
             if (!context.SkipDefaultAction)
             {
-                context.Result = context.Roles["Client"];
+                if (context.Roles.TryGetValue("Client", out var role))
+                {
+                    context.Result = role;
+                }
             }
 
             context.Plugins.Execute<IAfterAction>(context, cancellationToken);

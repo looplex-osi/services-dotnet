@@ -113,12 +113,9 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
 
             if (!context.SkipDefaultAction)
             {
-                var groupId = Guid.NewGuid();
-
-                context.Roles["Group"].Id = groupId.ToString();
                 _groups.Add(context.Roles["Group"]);
 
-                context.Result = groupId;
+                context.Result = context.Roles["Group"].Id;
             }
 
             context.Plugins.Execute<IAfterAction>(context, cancellationToken);
