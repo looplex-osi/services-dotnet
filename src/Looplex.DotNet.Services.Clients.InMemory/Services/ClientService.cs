@@ -8,12 +8,13 @@ using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
 using Looplex.OpenForExtension.Abstractions.Commands;
 using Looplex.OpenForExtension.Abstractions.Contexts;
 using Looplex.OpenForExtension.Abstractions.ExtensionMethods;
+using ScimPatch;
 
 namespace Looplex.DotNet.Services.Clients.InMemory.Services
 {
     public class ClientService() : IClientService
     {
-        private static readonly IList<Client> _clients = [];
+        internal static IList<Client> Clients = [];
         
         public Task GetAllAsync(IContext context, CancellationToken cancellationToken)
         {
@@ -33,7 +34,7 @@ namespace Looplex.DotNet.Services.Clients.InMemory.Services
 
             if (!context.SkipDefaultAction)
             {
-                var records = _clients
+                var records = Clients
                     .Skip(PaginationUtils.GetOffset(perPage, page))
                     .Take(perPage)
                     .ToList();
@@ -43,9 +44,9 @@ namespace Looplex.DotNet.Services.Clients.InMemory.Services
                     Records = records.Select(r => (object)r).ToList(),
                     Page = page,
                     PerPage = perPage,
-                    TotalCount = _clients.Count
+                    TotalCount = Clients.Count
                 };
-                context.State.Pagination.TotalCount = _clients.Count;
+                context.State.Pagination.TotalCount = Clients.Count;
                 
                 context.Result = result.ToJson(Client.Converter.Settings);
             }
@@ -64,7 +65,7 @@ namespace Looplex.DotNet.Services.Clients.InMemory.Services
             var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
             context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
-            var client = _clients.FirstOrDefault(c => c.Id == id.ToString());
+            var client = Clients.FirstOrDefault(c => c.Id == id.ToString());
             if (client == null)
             {
                 throw new EntityNotFoundException(nameof(Client), id.ToString());
@@ -113,7 +114,7 @@ namespace Looplex.DotNet.Services.Clients.InMemory.Services
 
             if (!context.SkipDefaultAction)
             {
-                _clients.Add(context.Roles["Client"]);
+                Clients.Add(context.Roles["Client"]);
 
                 context.Result = context.Roles["Client"].Id;
             }
@@ -124,6 +125,45 @@ namespace Looplex.DotNet.Services.Clients.InMemory.Services
 
             return Task.CompletedTask;
         }
+        
+        public async Task PatchAsync(IContext context, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var json = context.GetRequiredValue<string>("Operations");
+            await GetByIdAsync(context, cancellationToken);
+            var client = (Client)context.Roles["Client"];
+            var operations = OperationTracker.FromJson(client, json);
+            context.Plugins.Execute<IHandleInput>(context, cancellationToken);
+
+            if (operations.Count == 0)
+            {
+                throw new InvalidOperationException("List of operations can't be empty.");
+            }
+            context.Plugins.Execute<IValidateInput>(context, cancellationToken);
+
+            context.Roles["Operations"] = operations;
+            context.Plugins.Execute<IDefineRoles>(context, cancellationToken);
+
+            context.Plugins.Execute<IBind>(context, cancellationToken);
+
+            context.Plugins.Execute<IBeforeAction>(context, cancellationToken);
+
+            if (!context.SkipDefaultAction)
+            {
+                foreach (var operationNode in context.Roles["Operations"])
+                {
+                    if (!await operationNode.TryApplyAsync())
+                    {
+                        throw operationNode.OperationException;
+                    }
+                }
+            }
+
+            context.Plugins.Execute<IAfterAction>(context, cancellationToken);
+
+            context.Plugins.Execute<IReleaseUnmanagedResources>(context, cancellationToken);
+        }
 
         public Task DeleteAsync(IContext context, CancellationToken cancellationToken)
         {
@@ -132,7 +172,7 @@ namespace Looplex.DotNet.Services.Clients.InMemory.Services
             var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
             context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
-            var client = _clients.FirstOrDefault(c => c.Id == id.ToString());
+            var client = Clients.FirstOrDefault(c => c.Id == id.ToString());
             if (client == null)
             {
                 throw new EntityNotFoundException(nameof(Client), id.ToString());
@@ -148,7 +188,7 @@ namespace Looplex.DotNet.Services.Clients.InMemory.Services
 
             if (!context.SkipDefaultAction)
             {
-                _clients.Remove(context.Roles["Client"]);
+                Clients.Remove(context.Roles["Client"]);
             }
 
             context.Plugins.Execute<IAfterAction>(context, cancellationToken);
@@ -166,7 +206,7 @@ namespace Looplex.DotNet.Services.Clients.InMemory.Services
             string secret = context.State.ClientSecret;
             context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
-            var client = _clients.FirstOrDefault(c => Guid.Parse(c.Id) == id && c.Secret == secret);
+            var client = Clients.FirstOrDefault(c => Guid.Parse(c.Id) == id && c.Secret == secret);
             context.Plugins.Execute<IValidateInput>(context, cancellationToken);
 
             if (client != null)
