@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="1.1.1"></a>
+## 1.1.1 (2024-08-22)
+
+### Bug Fixes
+
+* patch and delete service methods get the entity by calling the getbyid service method
+* upgrade middleware and test packages
+
 <a name="1.1.0"></a>
 ## 1.1.0 (2024-08-22)
 
