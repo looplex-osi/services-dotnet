@@ -5,7 +5,6 @@ using Looplex.DotNet.Core.Domain;
 using Looplex.DotNet.Middlewares.Clients.Application.Abstractions.Services;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Schemas;
 using Looplex.DotNet.Middlewares.Clients.Domain.Entities.Clients;
-using Looplex.DotNet.Middlewares.OAuth2.Domain.Entities;
 using Looplex.DotNet.Services.Clients.InMemory.Services;
 using Looplex.OpenForExtension.Abstractions.Contexts;
 using Newtonsoft.Json;
