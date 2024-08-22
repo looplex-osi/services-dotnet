@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="1.1.0"></a>
+## 1.1.0 (2024-08-22)
+
+### Features
+
+* added in memory implementation of patch operation and unit test for the services
+
 <a name="1.0.11"></a>
 ## 1.0.11 (2024-07-20)
 
