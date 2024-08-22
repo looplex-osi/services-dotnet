@@ -5,6 +5,7 @@ using Looplex.DotNet.Core.Domain;
 using Looplex.DotNet.Middlewares.Clients.Application.Abstractions.Services;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Schemas;
 using Looplex.DotNet.Middlewares.Clients.Domain.Entities.Clients;
+using Looplex.DotNet.Middlewares.OAuth2.Domain.Entities;
 using Looplex.DotNet.Services.Clients.InMemory.Services;
 using Looplex.OpenForExtension.Abstractions.Contexts;
 using Newtonsoft.Json;
@@ -172,6 +173,7 @@ public class ClientServiceTests
         await _clientService.GetByIdAndSecretOrDefaultAsync(_context, _cancellationToken);
             
         // Assert
+        _context.Roles.Should().NotContainKey("Client");
         Assert.IsNull(_context.Result);
     }
     
@@ -201,7 +203,7 @@ public class ClientServiceTests
                 .Using<DateTime>(ctx => ctx.Subject.ToUniversalTime().Should().Be(ctx.Expectation.ToUniversalTime()))
                 .WhenTypeIs<DateTime>());
         
-        Assert.IsNotNull(_context.Roles["Client"]);
+        _context.Roles.Should().ContainKey("Client");
         ((Client)_context.Roles["Client"]).Should().BeEquivalentTo(existingClient);
     }
 }
