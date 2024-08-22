@@ -165,21 +165,21 @@ namespace Looplex.DotNet.Services.Clients.InMemory.Services
             context.Plugins.Execute<IReleaseUnmanagedResources>(context, cancellationToken);
         }
 
-        public Task DeleteAsync(IContext context, CancellationToken cancellationToken)
+        public async Task DeleteAsync(IContext context, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             
             var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
             context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
-            var client = Clients.FirstOrDefault(c => c.Id == id.ToString());
+            await GetByIdAsync(context, cancellationToken);
+            var client = (Client)context.Roles["Client"];
             if (client == null)
             {
                 throw new EntityNotFoundException(nameof(Client), id.ToString());
             }
             context.Plugins.Execute<IValidateInput>(context, cancellationToken);
-
-            context.Roles.Add("Client", client);
+            
             context.Plugins.Execute<IDefineRoles>(context, cancellationToken);
 
             context.Plugins.Execute<IBind>(context, cancellationToken);
@@ -194,25 +194,23 @@ namespace Looplex.DotNet.Services.Clients.InMemory.Services
             context.Plugins.Execute<IAfterAction>(context, cancellationToken);
 
             context.Plugins.Execute<IReleaseUnmanagedResources>(context, cancellationToken);
-
-            return Task.CompletedTask;
         }
 
         public Task GetByIdAndSecretOrDefaultAsync(IContext context, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             
-            Guid id = context.State.ClientId;
+            Guid id = Guid.Parse(context.State.ClientId);
             string secret = context.State.ClientSecret;
             context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
             var client = Clients.FirstOrDefault(c => Guid.Parse(c.Id) == id && c.Secret == secret);
-            context.Plugins.Execute<IValidateInput>(context, cancellationToken);
-
             if (client != null)
             {
                 context.Roles.Add("Client", client);
             }
+            context.Plugins.Execute<IValidateInput>(context, cancellationToken);
+            
             context.Plugins.Execute<IDefineRoles>(context, cancellationToken);
 
             context.Plugins.Execute<IBind>(context, cancellationToken);
@@ -223,7 +221,7 @@ namespace Looplex.DotNet.Services.Clients.InMemory.Services
             {
                 if (context.Roles.TryGetValue("Client", out var role))
                 {
-                    context.Result = role;
+                    context.Result = ((Client)role).ToJson();;
                 }
             }
 

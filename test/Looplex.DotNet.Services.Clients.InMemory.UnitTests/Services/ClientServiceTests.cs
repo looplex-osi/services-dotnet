@@ -160,4 +160,48 @@ public class ClientServiceTests
         // Assert
         ClientService.Clients.Should().NotContain(u => u.Id == existingClient.Id);
     }
+    
+    [TestMethod]
+    public async Task GetByIdAndSecretOrDefaultAsync_ShouldReturnNull_WhenClientDoesNotExist()
+    {
+        // Arrange
+        _context.State.ClientId = Guid.NewGuid().ToString();
+        _context.State.ClientSecret = Guid.NewGuid().ToString();
+
+        // Act
+        await _clientService.GetByIdAndSecretOrDefaultAsync(_context, _cancellationToken);
+            
+        // Assert
+        Assert.IsNull(_context.Result);
+    }
+    
+    [TestMethod]
+    public async Task GetByIdAndSecretOrDefaultAsync_ShouldRemoveClientFromList_WhenClientDoesExist()
+    {
+        // Arrange
+        var existingClient = new Client
+        {
+            Id = Guid.NewGuid().ToString(),
+            Secret = Guid.NewGuid().ToString(),
+            DisplayName = "displayName1",
+            ExpirationTime = new DateTimeOffset(2024, 12,20,0,0,0,TimeSpan.Zero),
+            NotBefore = new DateTimeOffset(2024, 12,1,0,0,0,TimeSpan.Zero),
+        };
+        _context.State.ClientId = existingClient.Id;
+        _context.State.ClientSecret = existingClient.Secret;
+        ClientService.Clients.Add(existingClient);
+
+        // Act
+        await _clientService.GetByIdAndSecretOrDefaultAsync(_context, _cancellationToken);
+
+        // Assert
+        Assert.IsNotNull(_context.Result);
+        JsonConvert.DeserializeObject<Client>((string)_context.Result!).Should()
+            .BeEquivalentTo(existingClient, options => options
+                .Using<DateTime>(ctx => ctx.Subject.ToUniversalTime().Should().Be(ctx.Expectation.ToUniversalTime()))
+                .WhenTypeIs<DateTime>());
+        
+        Assert.IsNotNull(_context.Roles["Client"]);
+        ((Client)_context.Roles["Client"]).Should().BeEquivalentTo(existingClient);
+    }
 }

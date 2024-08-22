@@ -165,21 +165,21 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
             context.Plugins.Execute<IReleaseUnmanagedResources>(context, cancellationToken);
         }
 
-        public Task DeleteAsync(IContext context, CancellationToken cancellationToken)
+        public async Task DeleteAsync(IContext context, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
             context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
-            var user = Users.FirstOrDefault(u => u.Id == id.ToString());
+            await GetByIdAsync(context, cancellationToken);
+            var user = (User)context.Roles["User"];
             if (user == null)
             {
                 throw new EntityNotFoundException(nameof(User), id.ToString());
             }
             context.Plugins.Execute<IValidateInput>(context, cancellationToken);
 
-            context.Roles["User"] = user;
             context.Plugins.Execute<IDefineRoles>(context, cancellationToken);
 
             context.Plugins.Execute<IBind>(context, cancellationToken);
@@ -194,8 +194,6 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
             context.Plugins.Execute<IAfterAction>(context, cancellationToken);
 
             context.Plugins.Execute<IReleaseUnmanagedResources>(context, cancellationToken);
-
-            return Task.CompletedTask;
         }
     }
 }
