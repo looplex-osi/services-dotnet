@@ -41,7 +41,8 @@ public class GroupServiceTests
         _context.State.Pagination.PerPage = 10;
         var existingGroup = new Group
         {
-            Id = "group1",
+            Id = null,
+            UniqueId = Guid.NewGuid(),
             DisplayName = "displayName1"
         };
         GroupService.Groups.Add(existingGroup);
@@ -71,10 +72,11 @@ public class GroupServiceTests
         // Arrange
         var existingGroup = new Group
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = null,
+            UniqueId = Guid.NewGuid(),
             DisplayName = "displayName1"
         };
-        _context.State.Id = existingGroup.Id;
+        _context.State.Id = existingGroup.UniqueId.ToString()!;
         GroupService.Groups.Add(existingGroup);
 
         // Act
@@ -88,8 +90,8 @@ public class GroupServiceTests
     public async Task CreateAsync_ShouldAddGroupToList()
     {
         // Arrange
-        var id = Guid.NewGuid().ToString();
-        var groupJson = $"{{ \"Id\": \"{id}\", \"DisplayName\": \"Test Group\" }}";
+        var id = Guid.NewGuid();
+        var groupJson = $"{{ \"id\": \"{id}\", \"displayName\": \"Test Group\" }}";
         _context.State.Resource = groupJson;
         Schema.Add<Group>("{}");
         
@@ -98,7 +100,7 @@ public class GroupServiceTests
 
         // Assert
         Assert.AreEqual(id, _context.Result);
-        GroupService.Groups.Should().Contain(u => u.Id == id);
+        GroupService.Groups.Should().Contain(u => u.UniqueId == id);
     }
 
     [TestMethod]
@@ -107,13 +109,14 @@ public class GroupServiceTests
         // Arrange
         var existingGroup = new Group
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = 1,
+            UniqueId = Guid.NewGuid(),
             DisplayName = "displayName1"
         };
         _context.State.Id = existingGroup.Id;
         GroupService.Groups.Add(existingGroup);
         _context.State.Operations = "[ { \"op\": \"add\", \"path\": \"DisplayName\", \"value\": \"Updated Group\" } ]";
-        _context.State.Id = existingGroup.Id;
+        _context.State.Id = existingGroup.UniqueId.ToString()!;
 
         // Act
         await _groupService.PatchAsync(_context, _cancellationToken);
@@ -139,16 +142,17 @@ public class GroupServiceTests
         // Arrange
         var existingGroup = new Group
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = 1,
+            UniqueId = Guid.NewGuid(),
             DisplayName = "displayName1"
         };
-        _context.State.Id = existingGroup.Id;
+        _context.State.Id = existingGroup.UniqueId.ToString()!;
         GroupService.Groups.Add(existingGroup);
 
         // Act
         await _groupService.DeleteAsync(_context, _cancellationToken);
 
         // Assert
-        GroupService.Groups.Should().NotContain(u => u.Id == existingGroup.Id);
+        GroupService.Groups.Should().NotContain(u => u.UniqueId == existingGroup.UniqueId);
     }
 }

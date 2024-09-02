@@ -65,7 +65,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
             var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
             context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
-            var group = Groups.FirstOrDefault(g => g.Id == id.ToString());
+            var group = Groups.FirstOrDefault(g => g.UniqueId == id);
             if (group == null)
             {
                 throw new EntityNotFoundException(nameof(Group), id.ToString());
@@ -116,7 +116,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
             {
                 Groups.Add(context.Roles["Group"]);
 
-                context.Result = context.Roles["Group"].Id;
+                context.Result = context.Roles["Group"].UniqueId;
             }
 
             context.Plugins.Execute<IAfterAction>(context, cancellationToken);
@@ -158,6 +158,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
                         throw operationNode.OperationException;
                     }
                 }
+                // persistir model usando changedProperties
             }
 
             context.Plugins.Execute<IAfterAction>(context, cancellationToken);

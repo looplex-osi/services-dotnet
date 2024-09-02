@@ -41,7 +41,8 @@ public class UserServiceTests
         _context.State.Pagination.PerPage = 10;
         var existingUser = new User
         {
-            Id = "user1",
+            Id = null,
+            UniqueId = Guid.NewGuid(),
             UserName = "userName1"
         };
         UserService.Users.Add(existingUser);
@@ -71,10 +72,11 @@ public class UserServiceTests
         // Arrange
         var existingUser = new User
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = null,
+            UniqueId = Guid.NewGuid(),
             UserName = "userName1"
         };
-        _context.State.Id = existingUser.Id;
+        _context.State.Id = existingUser.UniqueId.ToString()!;
         UserService.Users.Add(existingUser);
 
         // Act
@@ -88,8 +90,8 @@ public class UserServiceTests
     public async Task CreateAsync_ShouldAddUserToList()
     {
         // Arrange
-        var id = Guid.NewGuid().ToString();
-        var userJson = $"{{ \"Id\": \"{id}\", \"UserName\": \"Test User\" }}";
+        var id = Guid.NewGuid();
+        var userJson = $"{{ \"id\": \"{id}\", \"userName\": \"Test User\" }}";
         _context.State.Resource = userJson;
         Schema.Add<User>("{}");
         
@@ -98,7 +100,7 @@ public class UserServiceTests
 
         // Assert
         Assert.AreEqual(id, _context.Result);
-        UserService.Users.Should().Contain(u => u.Id == id);
+        UserService.Users.Should().Contain(u => u.UniqueId == id);
     }
     
     [TestMethod]
@@ -107,13 +109,13 @@ public class UserServiceTests
         // Arrange
         var existingUser = new User
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = 1,
+            UniqueId = Guid.NewGuid(),
             UserName = "userName1"
         };
-        _context.State.Id = existingUser.Id;
         UserService.Users.Add(existingUser);
         _context.State.Operations = "[ { \"op\": \"add\", \"path\": \"InvalidPath\", \"value\": \"Updated User\" } ]";
-        _context.State.Id = existingUser.Id;
+        _context.State.Id = existingUser.UniqueId.ToString()!;
 
         // Act
         var action = () => _userService.PatchAsync(_context, _cancellationToken);
@@ -129,13 +131,13 @@ public class UserServiceTests
         // Arrange
         var existingUser = new User
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = 1,
+            UniqueId = Guid.NewGuid(),
             UserName = "userName1"
         };
-        _context.State.Id = existingUser.Id;
         UserService.Users.Add(existingUser);
         _context.State.Operations = "[ { \"op\": \"add\", \"path\": \"UserName\", \"value\": \"Updated User\" } ]";
-        _context.State.Id = existingUser.Id;
+        _context.State.Id = existingUser.UniqueId.ToString()!;
 
         // Act
         await _userService.PatchAsync(_context, _cancellationToken);
@@ -161,10 +163,11 @@ public class UserServiceTests
         // Arrange
         var existingUser = new User
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = 1,
+            UniqueId = Guid.NewGuid(),
             UserName = "userName1"
         };
-        _context.State.Id = existingUser.Id;
+        _context.State.Id = existingUser.UniqueId.ToString()!;
         UserService.Users.Add(existingUser);
 
         // Act

@@ -65,7 +65,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
             var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
             context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
-            var user = Users.FirstOrDefault(u => u.Id == id.ToString());
+            var user = Users.FirstOrDefault(u => u.UniqueId == id);
             if (user == null)
             {
                 throw new EntityNotFoundException(nameof(User), id.ToString());
@@ -116,7 +116,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
             {
                 Users.Add(context.Roles["User"]);
 
-                context.Result = context.Roles["User"].Id;
+                context.Result = context.Roles["User"].UniqueId;
             }
 
             context.Plugins.Execute<IAfterAction>(context, cancellationToken);

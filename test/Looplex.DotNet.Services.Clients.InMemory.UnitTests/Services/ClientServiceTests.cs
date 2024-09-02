@@ -41,7 +41,8 @@ public class ClientServiceTests
         _context.State.Pagination.PerPage = 10;
         var existingClient = new Client
         {
-            Id = "client1",
+            Id = null,
+            UniqueId = Guid.NewGuid(),
             Secret = "secret1",
             DisplayName = "displayName1",
             ExpirationTime = new DateTimeOffset(2024, 12,20,0,0,0,TimeSpan.Zero),
@@ -77,11 +78,12 @@ public class ClientServiceTests
         // Arrange
         var existingClient = new Client
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = null,
+            UniqueId = Guid.NewGuid(),
             Secret = "secret1",
             DisplayName = "displayName1"
         };
-        _context.State.Id = existingClient.Id;
+        _context.State.Id = existingClient.UniqueId.ToString()!;
         ClientService.Clients.Add(existingClient);
 
         // Act
@@ -95,8 +97,8 @@ public class ClientServiceTests
     public async Task CreateAsync_ShouldAddClientToList()
     {
         // Arrange
-        var id = Guid.NewGuid().ToString();
-        var clientJson = $"{{ \"Id\": \"{id}\", \"Secret\": \"Test Client\" }}";
+        var id = Guid.NewGuid();
+        var clientJson = $"{{ \"id\": \"{id}\", \"secret\": \"Test Client\" }}";
         _context.State.Resource = clientJson;
         Schema.Add<Client>("{}");
         
@@ -105,7 +107,7 @@ public class ClientServiceTests
 
         // Assert
         Assert.AreEqual(id, _context.Result);
-        ClientService.Clients.Should().Contain(u => u.Id == id);
+        ClientService.Clients.Should().Contain(u => u.UniqueId == id);
     }
 
     [TestMethod]
@@ -114,20 +116,20 @@ public class ClientServiceTests
         // Arrange
         var existingClient = new Client
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = 1,
+            UniqueId = Guid.NewGuid(),
             Secret = "secret1",
             DisplayName = "displayName1"
         };
-        _context.State.Id = existingClient.Id;
         ClientService.Clients.Add(existingClient);
         _context.State.Operations = "[ { \"op\": \"add\", \"path\": \"Secret\", \"value\": \"Updated Client\" } ]";
-        _context.State.Id = existingClient.Id;
+        _context.State.Id = existingClient.UniqueId.ToString()!;
 
         // Act
         await _clientService.PatchAsync(_context, _cancellationToken);
 
         // Assert
-        var client = ClientService.Clients.First(u => u.Id == existingClient.Id);
+        var client = ClientService.Clients.First(u => u.UniqueId == existingClient.UniqueId);
         client.Secret.Should().Be("Updated Client");
     }
     
@@ -147,11 +149,12 @@ public class ClientServiceTests
         // Arrange
         var existingClient = new Client
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = 1,
+            UniqueId = Guid.NewGuid(),
             Secret = "secret1",
             DisplayName = "displayName1"
         };
-        _context.State.Id = existingClient.Id;
+        _context.State.Id = existingClient.UniqueId.ToString()!;
         ClientService.Clients.Add(existingClient);
 
         // Act
@@ -182,13 +185,14 @@ public class ClientServiceTests
         // Arrange
         var existingClient = new Client
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = null,
+            UniqueId = Guid.NewGuid(),
             Secret = Guid.NewGuid().ToString(),
             DisplayName = "displayName1",
             ExpirationTime = new DateTimeOffset(2024, 12,20,0,0,0,TimeSpan.Zero),
             NotBefore = new DateTimeOffset(2024, 12,1,0,0,0,TimeSpan.Zero),
         };
-        _context.State.ClientId = existingClient.Id;
+        _context.State.ClientId = existingClient.UniqueId.ToString()!;
         _context.State.ClientSecret = existingClient.Secret;
         ClientService.Clients.Add(existingClient);
 

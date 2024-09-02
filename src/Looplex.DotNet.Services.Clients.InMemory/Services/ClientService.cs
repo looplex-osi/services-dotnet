@@ -65,7 +65,7 @@ namespace Looplex.DotNet.Services.Clients.InMemory.Services
             var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
             context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
-            var client = Clients.FirstOrDefault(c => c.Id == id.ToString());
+            var client = Clients.FirstOrDefault(c => c.UniqueId == id);
             if (client == null)
             {
                 throw new EntityNotFoundException(nameof(Client), id.ToString());
@@ -116,7 +116,7 @@ namespace Looplex.DotNet.Services.Clients.InMemory.Services
             {
                 Clients.Add(context.Roles["Client"]);
 
-                context.Result = context.Roles["Client"].Id;
+                context.Result = context.Roles["Client"].UniqueId;
             }
 
             context.Plugins.Execute<IAfterAction>(context, cancellationToken);
@@ -204,7 +204,7 @@ namespace Looplex.DotNet.Services.Clients.InMemory.Services
             string secret = context.State.ClientSecret;
             context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
-            var client = Clients.FirstOrDefault(c => Guid.Parse(c.Id) == id && c.Secret == secret);
+            var client = Clients.FirstOrDefault(c => c.UniqueId == id && c.Secret == secret);
             if (client != null)
             {
                 context.Roles.Add("Client", client);
