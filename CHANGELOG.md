@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="1.1.4"></a>
+## 1.1.4 (2024-09-09)
+
+### Bug Fixes
+
+* make use of observableproxy on patch
+
 <a name="1.1.3"></a>
 ## 1.1.3 (2024-09-02)
 
