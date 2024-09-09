@@ -131,6 +131,7 @@ public class ClientServiceTests
         // Assert
         var client = ClientService.Clients.First(u => u.UniqueId == existingClient.UniqueId);
         client.Secret.Should().Be("Updated Client");
+        ((Client)_context.Roles["Client"]).ChangedPropertyNotification.ChangedProperties.Should().BeEquivalentTo(["Secret"]);
     }
     
     [TestMethod]

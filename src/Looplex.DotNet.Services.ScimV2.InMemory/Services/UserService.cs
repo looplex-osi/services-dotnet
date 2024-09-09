@@ -132,7 +132,9 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
 
             var json = context.GetRequiredValue<string>("Operations");
             await GetByIdAsync(context, cancellationToken);
-            var user = (User)context.Roles["User"];
+            var user = ((User)context.Roles["User"])
+                .WithObservableProxy();
+            context.Roles["User"] = user;
             var operations = OperationTracker.FromJson(user, json);
             context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 

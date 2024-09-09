@@ -132,7 +132,9 @@ namespace Looplex.DotNet.Services.Clients.InMemory.Services
 
             var json = context.GetRequiredValue<string>("Operations");
             await GetByIdAsync(context, cancellationToken);
-            var client = (Client)context.Roles["Client"];
+            var client = ((Client)context.Roles["Client"])
+                .WithObservableProxy();
+            context.Roles["Client"] = client;
             var operations = OperationTracker.FromJson(client, json);
             context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 

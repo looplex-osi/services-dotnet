@@ -96,7 +96,8 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
             cancellationToken.ThrowIfCancellationRequested();
 
             var json = context.GetRequiredValue<string>("Resource");
-            var group = Resource.FromJson<Group>(json, out var messages);
+            var group = Resource
+                .FromJson<Group>(json, out var messages);
             context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
             if (messages.Count > 0)
@@ -132,7 +133,9 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
 
             var json = context.GetRequiredValue<string>("Operations");
             await GetByIdAsync(context, cancellationToken);
-            var group = (Group)context.Roles["Group"];
+            var group = ((Group)context.Roles["Group"])
+                .WithObservableProxy();
+            context.Roles["Group"] = group;
             var operations = OperationTracker.FromJson(group, json);
             context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
@@ -158,7 +161,6 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
                         throw operationNode.OperationException;
                     }
                 }
-                // persistir model usando changedProperties
             }
 
             context.Plugins.Execute<IAfterAction>(context, cancellationToken);

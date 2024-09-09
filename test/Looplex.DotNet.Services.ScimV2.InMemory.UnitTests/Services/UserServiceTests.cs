@@ -145,6 +145,7 @@ public class UserServiceTests
         // Assert
         var user = UserService.Users.First(u => u.Id == existingUser.Id);
         user.UserName.Should().Be("Updated User");
+        ((User)_context.Roles["User"]).ChangedPropertyNotification.ChangedProperties.Should().BeEquivalentTo(["UserName"]);
     }
     
     [TestMethod]

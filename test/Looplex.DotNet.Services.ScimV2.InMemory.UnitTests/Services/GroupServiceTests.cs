@@ -124,6 +124,7 @@ public class GroupServiceTests
         // Assert
         var group = GroupService.Groups.First(u => u.Id == existingGroup.Id);
         group.DisplayName.Should().Be("Updated Group");
+        ((Group)_context.Roles["Group"]).ChangedPropertyNotification.ChangedProperties.Should().BeEquivalentTo(["DisplayName"]);
     }
     
     [TestMethod]
