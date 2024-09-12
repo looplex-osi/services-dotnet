@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="1.1.7"></a>
+## 1.1.7 (2024-09-12)
+
+### Bug Fixes
+
+* upgrade packages
+
 <a name="1.1.6"></a>
 ## 1.1.6 (2024-09-11)
 
