@@ -7,13 +7,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D3F24E77-781
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{30A93E4A-33D2-459C-8911-3A3327F08543}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Looplex.DotNet.Services.Clients.InMemory", "src\Looplex.DotNet.Services.Clients.InMemory\Looplex.DotNet.Services.Clients.InMemory.csproj", "{D2054BFA-7598-4964-BDA8-49D2C655ACF7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Looplex.DotNet.Services.ApiKeys.InMemory", "src\Looplex.DotNet.Services.ApiKeys.InMemory\Looplex.DotNet.Services.ApiKeys.InMemory.csproj", "{D2054BFA-7598-4964-BDA8-49D2C655ACF7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Looplex.DotNet.Services.ScimV2.InMemory", "src\Looplex.DotNet.Services.ScimV2.InMemory\Looplex.DotNet.Services.ScimV2.InMemory.csproj", "{528A6F2D-0EA1-408C-BFBF-4B084EBA35C7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Looplex.DotNet.Services.ScimV2.InMemory.UnitTests", "test\Looplex.DotNet.Services.ScimV2.InMemory.UnitTests\Looplex.DotNet.Services.ScimV2.InMemory.UnitTests.csproj", "{A77304D5-F0C5-4654-8DF3-082959B1C185}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Looplex.DotNet.Services.Clients.InMemory.UnitTests", "test\Looplex.DotNet.Services.Clients.InMemory.UnitTests\Looplex.DotNet.Services.Clients.InMemory.UnitTests.csproj", "{0F96A212-9481-4E47-BD64-AF4FD0EFB1C2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Looplex.DotNet.Services.ApiKeys.InMemory.UnitTests", "test\Looplex.DotNet.Services.ApiKeys.InMemory.UnitTests\Looplex.DotNet.Services.ApiKeys.InMemory.UnitTests.csproj", "{0F96A212-9481-4E47-BD64-AF4FD0EFB1C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

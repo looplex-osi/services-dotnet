@@ -136,20 +136,20 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
                 .WithObservableProxy();
             context.Roles["User"] = user;
             var operations = OperationTracker.FromJson(user, json);
-            context.Plugins.Execute<IHandleInput>(context, cancellationToken);
+            await context.Plugins.ExecuteAsync<IHandleInput>(context, cancellationToken);
 
             if (operations.Count == 0)
             {
                 throw new InvalidOperationException("List of operations can't be empty.");
             }
-            context.Plugins.Execute<IValidateInput>(context, cancellationToken);
+            await context.Plugins.ExecuteAsync<IValidateInput>(context, cancellationToken);
 
             context.Roles["Operations"] = operations;
-            context.Plugins.Execute<IDefineRoles>(context, cancellationToken);
+            await context.Plugins.ExecuteAsync<IDefineRoles>(context, cancellationToken);
 
-            context.Plugins.Execute<IBind>(context, cancellationToken);
+            await context.Plugins.ExecuteAsync<IBind>(context, cancellationToken);
 
-            context.Plugins.Execute<IBeforeAction>(context, cancellationToken);
+            await context.Plugins.ExecuteAsync<IBeforeAction>(context, cancellationToken);
 
             if (!context.SkipDefaultAction)
             {
@@ -162,9 +162,9 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
                 }
             }
 
-            context.Plugins.Execute<IAfterAction>(context, cancellationToken);
+            await context.Plugins.ExecuteAsync<IAfterAction>(context, cancellationToken);
 
-            context.Plugins.Execute<IReleaseUnmanagedResources>(context, cancellationToken);
+            await context.Plugins.ExecuteAsync<IReleaseUnmanagedResources>(context, cancellationToken);
         }
 
         public async Task DeleteAsync(IContext context, CancellationToken cancellationToken)
@@ -172,7 +172,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
             cancellationToken.ThrowIfCancellationRequested();
 
             var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
-            context.Plugins.Execute<IHandleInput>(context, cancellationToken);
+            await context.Plugins.ExecuteAsync<IHandleInput>(context, cancellationToken);
 
             await GetByIdAsync(context, cancellationToken);
             var user = (User)context.Roles["User"];
@@ -180,22 +180,22 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
             {
                 throw new EntityNotFoundException(nameof(User), id.ToString());
             }
-            context.Plugins.Execute<IValidateInput>(context, cancellationToken);
+            await context.Plugins.ExecuteAsync<IValidateInput>(context, cancellationToken);
 
-            context.Plugins.Execute<IDefineRoles>(context, cancellationToken);
+            await context.Plugins.ExecuteAsync<IDefineRoles>(context, cancellationToken);
 
-            context.Plugins.Execute<IBind>(context, cancellationToken);
+            await context.Plugins.ExecuteAsync<IBind>(context, cancellationToken);
 
-            context.Plugins.Execute<IBeforeAction>(context, cancellationToken);
+            await context.Plugins.ExecuteAsync<IBeforeAction>(context, cancellationToken);
 
             if (!context.SkipDefaultAction)
             {
                 Users.Remove(context.Roles["User"]);
             }
 
-            context.Plugins.Execute<IAfterAction>(context, cancellationToken);
+            await context.Plugins.ExecuteAsync<IAfterAction>(context, cancellationToken);
 
-            context.Plugins.Execute<IReleaseUnmanagedResources>(context, cancellationToken);
+            await context.Plugins.ExecuteAsync<IReleaseUnmanagedResources>(context, cancellationToken);
         }
     }
 }

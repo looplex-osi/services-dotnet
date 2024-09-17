@@ -22,11 +22,15 @@
     </ItemGroup>
 
     <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+    
+    <ItemGroup>
         <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\Looplex.DotNet.Services.Clients.InMemory\Looplex.DotNet.Services.Clients.InMemory.csproj" />
+      <ProjectReference Include="..\..\src\Looplex.DotNet.Services.ApiKeys.InMemory\Looplex.DotNet.Services.ApiKeys.InMemory.csproj" />
     </ItemGroup>
 
 </Project>
