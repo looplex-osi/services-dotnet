@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="2.0.0"></a>
+## 2.0.0 (2024-09-17)
+
+### Features
+
+* rename client to apikey and added bcrypt digest
+
+### Breaking Changes
+
+* rename client to apikey and added bcrypt digest
+
 <a name="1.1.7"></a>
 ## 1.1.7 (2024-09-12)
 
