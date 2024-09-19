@@ -8,9 +8,9 @@
 	<PackageId>Looplex.DotNet.Services.ApiKeys.InMemory</PackageId>
 	<Authors>Guilherme Câmara</Authors>
 	<Company>Looplex</Company>
-	<PackageTags>Looplex;Middleware;Clients;InMemory</PackageTags>
+	<PackageTags>Looplex;Middleware;ApiKey;Service;InMemory</PackageTags>
 	<Description>
-		Contains a in memory implementation for the ClientCredential resource type.
+		Contains a in memory implementation for the api-keys resource type.
 	</Description>
 	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
