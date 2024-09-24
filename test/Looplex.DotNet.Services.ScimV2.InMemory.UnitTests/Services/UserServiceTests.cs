@@ -90,8 +90,7 @@ public class UserServiceTests
     public async Task CreateAsync_ShouldAddUserToList()
     {
         // Arrange
-        var id = Guid.NewGuid();
-        var userJson = $"{{ \"id\": \"{id}\", \"userName\": \"Test User\" }}";
+        var userJson = $"{{ \"userName\": \"Test User\" }}";
         _context.State.Resource = userJson;
         Schema.Add<User>("{}");
         
@@ -99,7 +98,8 @@ public class UserServiceTests
         await _userService.CreateAsync(_context, _cancellationToken);
 
         // Assert
-        Assert.AreEqual(id, _context.Result);
+        Assert.IsNotNull(_context.Result);
+        var id = Guid.Parse((string)_context.Result);
         UserService.Users.Should().Contain(u => u.UniqueId == id);
     }
     

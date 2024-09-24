@@ -27,8 +27,8 @@
   <ItemGroup>
 	  <PackageReference Include="Looplex.DotNet.Core.Common" Version="1.1.2" />
 	  <PackageReference Include="Looplex.DotNet.Core.Application" Version="1.1.2" />
-	  <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2.Domain" Version="1.4.3" />
-	  <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions" Version="1.4.3" />
+	  <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2.Domain" Version="1.4.4" />
+	  <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions" Version="1.4.4" />
 	  <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
 	  <PackageReference Include="ScimPatch" Version="2.0.3" />
   </ItemGroup>

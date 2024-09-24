@@ -125,7 +125,6 @@ public class ApiKeyServiceTests
         _memoryStream.Seek(0, SeekOrigin.Begin);
         var responseBody = await new StreamReader(_memoryStream, Encoding.UTF8).ReadToEndAsync(CancellationToken.None);
         var apiKey = JsonConvert.DeserializeObject<ApiKeyDto>(responseBody)!;
-        apiKey.ClientId.Should().Be(id);
         apiKey.ClientSecret.Should().NotBeNullOrEmpty();
     }
 
@@ -210,7 +209,7 @@ public class ApiKeyServiceTests
     {
         // Arrange
         _context.State.ClientId = Guid.NewGuid().ToString();
-        _context.State.ClientSecret = Guid.NewGuid().ToString();
+        _context.State.ClientSecret = Convert.ToBase64String([1,0,1]);
 
         // Act
         await _apiKeyService.GetByIdAndSecretOrDefaultAsync(_context, _cancellationToken);
@@ -235,7 +234,7 @@ public class ApiKeyServiceTests
         _memoryStream.Seek(0, SeekOrigin.Begin);
         var responseBody = await new StreamReader(_memoryStream, Encoding.UTF8).ReadToEndAsync(CancellationToken.None);
         var apiKeyDto = JsonConvert.DeserializeObject<ApiKeyDto>(responseBody)!;
-
+        _context.Roles.Remove("ApiKey"); // Because we are using the same mock context
         _context.State.ClientId = apiKeyDto.ClientId.ToString()!;
         _context.State.ClientSecret = apiKeyDto.ClientSecret;
 
@@ -250,6 +249,7 @@ public class ApiKeyServiceTests
         apiKey.ExpirationTime.ToUniversalTime().Should().Be(expirationTime);
 
         _context.Roles.Should().ContainKey("ApiKey");
-        ((ApiKey)_context.Roles["ApiKey"]).Should().BeEquivalentTo(apiKey);
+        ((ApiKey)_context.Roles["ApiKey"]).Should()
+            .BeEquivalentTo(apiKey, option => option.Excluding(ak => ak.Id).Excluding(ak => ak.Digest));
     }
 }

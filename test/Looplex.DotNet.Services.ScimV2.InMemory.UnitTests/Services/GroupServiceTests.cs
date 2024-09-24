@@ -90,8 +90,7 @@ public class GroupServiceTests
     public async Task CreateAsync_ShouldAddGroupToList()
     {
         // Arrange
-        var id = Guid.NewGuid();
-        var groupJson = $"{{ \"id\": \"{id}\", \"displayName\": \"Test Group\" }}";
+        var groupJson = $"{{ \"displayName\": \"Test Group\" }}";
         _context.State.Resource = groupJson;
         Schema.Add<Group>("{}");
         
@@ -99,7 +98,8 @@ public class GroupServiceTests
         await _groupService.CreateAsync(_context, _cancellationToken);
 
         // Assert
-        Assert.AreEqual(id, _context.Result);
+        Assert.IsNotNull(_context.Result);
+        var id = Guid.Parse((string)_context.Result);
         GroupService.Groups.Should().Contain(u => u.UniqueId == id);
     }
 
