@@ -2,10 +2,10 @@ using System.Dynamic;
 using System.Text;
 using FluentAssertions;
 using Looplex.DotNet.Core.Common.Exceptions;
-using Looplex.DotNet.Core.Domain;
 using Looplex.DotNet.Middlewares.ApiKeys.Application.Abstractions.Services;
 using Looplex.DotNet.Middlewares.ApiKeys.Domain.Entities.ApiKeys;
-using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Schemas;
+using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
+using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Looplex.DotNet.Services.ApiKeys.InMemory.Dtos;
 using Looplex.DotNet.Services.ApiKeys.InMemory.Services;
 using Looplex.OpenForExtension.Abstractions.Contexts;
@@ -43,8 +43,8 @@ public class ApiKeyServiceTests
         _context.Roles.Returns(roles);
         _cancellationToken = new CancellationToken();
         
-        if (!Schema.Schemas.ContainsKey(typeof(ApiKey)))
-            Schema.Add<ApiKey>("{}");
+        if (!Schemas.ContainsKey(typeof(ApiKey)))
+            Schemas.Add(typeof(ApiKey), "{}");
     }
 
     [TestMethod]
@@ -52,8 +52,8 @@ public class ApiKeyServiceTests
     {
         // Arrange
         _context.State.Pagination = new ExpandoObject();
-        _context.State.Pagination.Page = 1;
-        _context.State.Pagination.PerPage = 10;
+        _context.State.Pagination.StartIndex = 1;
+        _context.State.Pagination.ItemsPerPage = 10;
         var existingApiKey = new ApiKey
         {
             Id = null,
@@ -68,9 +68,9 @@ public class ApiKeyServiceTests
         await _apiKeyService.GetAllAsync(_context, _cancellationToken);
 
         // Assert
-        var result = JsonConvert.DeserializeObject<PaginatedCollection>((string)_context.Result!)!;
-        Assert.AreEqual(1, result.TotalCount);
-        JsonConvert.DeserializeObject<ApiKey>(result.Records[0].ToString()!).Should()
+        var result = JsonConvert.DeserializeObject<ListResponse>((string)_context.Result!)!;
+        Assert.AreEqual(1, result.TotalResults);
+        JsonConvert.DeserializeObject<ApiKey>(result.Resources[0].ToString()!).Should()
             .BeEquivalentTo(existingApiKey, options => options
             .Using<DateTime>(ctx => ctx.Subject.ToUniversalTime().Should().Be(ctx.Expectation.ToUniversalTime()))
             .WhenTypeIs<DateTime>());

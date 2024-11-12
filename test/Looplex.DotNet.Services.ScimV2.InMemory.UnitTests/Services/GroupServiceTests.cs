@@ -1,10 +1,10 @@
 using System.Dynamic;
 using FluentAssertions;
 using Looplex.DotNet.Core.Common.Exceptions;
-using Looplex.DotNet.Core.Domain;
 using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Services;
-using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Schemas;
+using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Groups;
+using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Looplex.DotNet.Services.ScimV2.InMemory.Services;
 using Looplex.OpenForExtension.Abstractions.Contexts;
 using Newtonsoft.Json;
@@ -37,8 +37,8 @@ public class GroupServiceTests
     {
         // Arrange
         _context.State.Pagination = new ExpandoObject();
-        _context.State.Pagination.Page = 1;
-        _context.State.Pagination.PerPage = 10;
+        _context.State.Pagination.StartIndex = 1;
+        _context.State.Pagination.ItemsPerPage = 10;
         var existingGroup = new Group
         {
             Id = null,
@@ -51,9 +51,9 @@ public class GroupServiceTests
         await _groupService.GetAllAsync(_context, _cancellationToken);
 
         // Assert
-        var result = JsonConvert.DeserializeObject<PaginatedCollection>((string)_context.Result!)!;
-        Assert.AreEqual(1, result.TotalCount);
-        JsonConvert.DeserializeObject<Group>(result.Records[0].ToString()!).Should().BeEquivalentTo(existingGroup);
+        var result = JsonConvert.DeserializeObject<ListResponse>((string)_context.Result!)!;
+        Assert.AreEqual(1, result.TotalResults);
+        JsonConvert.DeserializeObject<Group>(result.Resources[0].ToString()!).Should().BeEquivalentTo(existingGroup);
     }
 
     [TestMethod]
@@ -92,7 +92,7 @@ public class GroupServiceTests
         // Arrange
         var groupJson = $"{{ \"displayName\": \"Test Group\" }}";
         _context.State.Resource = groupJson;
-        Schema.Add<Group>("{}");
+        Schemas.Add(typeof(Group), "{}");
         
         // Act
         await _groupService.CreateAsync(_context, _cancellationToken);

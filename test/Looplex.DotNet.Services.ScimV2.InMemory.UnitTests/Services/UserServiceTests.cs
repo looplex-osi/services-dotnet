@@ -1,9 +1,9 @@
 using System.Dynamic;
 using FluentAssertions;
 using Looplex.DotNet.Core.Common.Exceptions;
-using Looplex.DotNet.Core.Domain;
 using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Services;
-using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Schemas;
+using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
+using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Users;
 using Looplex.DotNet.Services.ScimV2.InMemory.Services;
 using Looplex.OpenForExtension.Abstractions.Contexts;
@@ -37,8 +37,8 @@ public class UserServiceTests
     {
         // Arrange
         _context.State.Pagination = new ExpandoObject();
-        _context.State.Pagination.Page = 1;
-        _context.State.Pagination.PerPage = 10;
+        _context.State.Pagination.StartIndex = 1;
+        _context.State.Pagination.ItemsPerPage = 10;
         var existingUser = new User
         {
             Id = null,
@@ -51,9 +51,9 @@ public class UserServiceTests
         await _userService.GetAllAsync(_context, _cancellationToken);
 
         // Assert
-        var result = JsonConvert.DeserializeObject<PaginatedCollection>((string)_context.Result!)!;
-        Assert.AreEqual(1, result.TotalCount);
-        JsonConvert.DeserializeObject<User>(result.Records[0].ToString()!).Should().BeEquivalentTo(existingUser);
+        var result = JsonConvert.DeserializeObject<ListResponse>((string)_context.Result!)!;
+        Assert.AreEqual(1, result.TotalResults);
+        JsonConvert.DeserializeObject<User>(result.Resources[0].ToString()!).Should().BeEquivalentTo(existingUser);
     }
 
     [TestMethod]
@@ -92,7 +92,7 @@ public class UserServiceTests
         // Arrange
         var userJson = $"{{ \"userName\": \"Test User\" }}";
         _context.State.Resource = userJson;
-        Schema.Add<User>("{}");
+        Schemas.Add(typeof(User), "{}");
         
         // Act
         await _userService.CreateAsync(_context, _cancellationToken);

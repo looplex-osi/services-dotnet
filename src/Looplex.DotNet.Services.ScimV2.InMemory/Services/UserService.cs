@@ -1,13 +1,13 @@
 ﻿using Looplex.DotNet.Core.Application.ExtensionMethods;
 using Looplex.DotNet.Core.Common.Exceptions;
-using Looplex.DotNet.Core.Common.Utils;
-using Looplex.DotNet.Core.Domain;
 using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Services;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
+using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Users;
 using Looplex.OpenForExtension.Abstractions.Commands;
 using Looplex.OpenForExtension.Abstractions.Contexts;
 using Looplex.OpenForExtension.Abstractions.ExtensionMethods;
+using Newtonsoft.Json;
 using ScimPatch;
 
 namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
@@ -20,8 +20,8 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
         {
             cancellationToken.ThrowIfCancellationRequested();
             
-            var page = context.GetRequiredValue<int>("Pagination.Page");
-            var perPage = context.GetRequiredValue<int>("Pagination.PerPage");
+            var startIndex = context.GetRequiredValue<int>("Pagination.StartIndex");
+            var itemsPerPage = context.GetRequiredValue<int>("Pagination.ItemsPerPage");
             context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
             context.Plugins.Execute<IValidateInput>(context, cancellationToken);
@@ -35,20 +35,21 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
             if (!context.SkipDefaultAction)
             {
                 var records = Users
-                    .Skip(PaginationUtils.GetOffset(perPage, page))
-                    .Take(perPage)
+                    .Skip(Math.Min(0, startIndex - 1))
+                    .Take(itemsPerPage)
                     .ToList();
 
-                var result = new PaginatedCollection
+                var result = new ListResponse
                 {
-                    Records = records.Select(r => (object)r).ToList(),
-                    Page = page,
-                    PerPage = perPage,
-                    TotalCount = Users.Count
+                    Resources = records.Select(r => (object)r).ToList(),
+                    StartIndex = startIndex,
+                    ItemsPerPage = itemsPerPage,
+                    TotalResults = Users.Count
+                    
                 };
                 context.State.Pagination.TotalCount = Users.Count;
                 
-                context.Result = result.ToJson(User.Converter.Settings);
+                context.Result = JsonConvert.SerializeObject(result, User.Converter.Settings);
             }
 
             context.Plugins.Execute<IAfterAction>(context, cancellationToken);
@@ -127,6 +128,13 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
             context.Plugins.Execute<IReleaseUnmanagedResources>(context, cancellationToken);
 
             return Task.CompletedTask;
+        }
+        
+        public Task UpdateAsync(IContext context, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            throw new NotImplementedException();
         }
         
         public async Task PatchAsync(IContext context, CancellationToken cancellationToken)
