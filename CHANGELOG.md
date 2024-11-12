@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="2.1.0"></a>
+## 2.1.0 (2024-11-12)
+
+### Features
+
+* **crudservices:** upgrade core and middleware packages
+
 <a name="2.0.2"></a>
 ## 2.0.2 (2024-09-24)
 
