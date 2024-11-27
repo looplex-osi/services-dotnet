@@ -9,7 +9,6 @@ using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Looplex.DotNet.Services.ApiKeys.InMemory.Dtos;
 using Looplex.DotNet.Services.ApiKeys.InMemory.Services;
-using Looplex.OpenForExtension.Abstractions.Contexts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;

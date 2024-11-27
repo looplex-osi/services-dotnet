@@ -7,7 +7,6 @@ using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Groups;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Looplex.DotNet.Services.ScimV2.InMemory.Services;
-using Looplex.OpenForExtension.Abstractions.Contexts;
 using Newtonsoft.Json;
 using NSubstitute;
 
