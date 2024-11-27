@@ -1,6 +1,7 @@
 ﻿using Looplex.DotNet.Core.Application.ExtensionMethods;
 using Looplex.DotNet.Core.Common.Exceptions;
 using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Services;
+using Looplex.DotNet.Middlewares.ScimV2.Domain;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Groups;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
@@ -62,7 +63,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
+            var id = Guid.Parse((string?)((IScimV2Context)context).RouteValues["GroupId"]!);
             context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
             var group = Groups.FirstOrDefault(g => g.UniqueId == id);
@@ -182,7 +183,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
+            var id = Guid.Parse((string?)((IScimV2Context)context).RouteValues["GroupId"]!);
             await context.Plugins.ExecuteAsync<IHandleInput>(context, cancellationToken);
 
             await GetByIdAsync(context, cancellationToken);

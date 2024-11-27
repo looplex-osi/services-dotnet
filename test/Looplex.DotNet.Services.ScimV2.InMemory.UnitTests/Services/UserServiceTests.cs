@@ -2,6 +2,7 @@ using System.Dynamic;
 using FluentAssertions;
 using Looplex.DotNet.Core.Common.Exceptions;
 using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Services;
+using Looplex.DotNet.Middlewares.ScimV2.Domain;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Users;
@@ -16,7 +17,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.UnitTests.Services;
 public class UserServiceTests
 {
     private IUserService _userService = null!;
-    private IContext _context = null!;
+    private IScimV2Context _context = null!;
     private CancellationToken _cancellationToken;
 
     [TestInitialize]
@@ -24,7 +25,7 @@ public class UserServiceTests
     {
         _userService = new UserService();
         UserService.Users = [];
-        _context = Substitute.For<IContext>();
+        _context = Substitute.For<IScimV2Context>();
         var state = new ExpandoObject();
         _context.State.Returns(state);
         var roles = new Dictionary<string, dynamic>();
@@ -60,8 +61,11 @@ public class UserServiceTests
     public async Task GetByIdAsync_ShouldThrowEntityNotFoundException_WhenUserDoesNotExist()
     {
         // Arrange
-        _context.State.Id = Guid.NewGuid().ToString();
-
+        _context.RouteValues = new Dictionary<string, object?>
+        {
+            { "UserId", Guid.NewGuid().ToString() }
+        };
+        
         // Act & Assert
         await Assert.ThrowsExceptionAsync<EntityNotFoundException>(() => _userService.GetByIdAsync(_context, _cancellationToken));
     }
@@ -76,7 +80,10 @@ public class UserServiceTests
             UniqueId = Guid.NewGuid(),
             UserName = "userName1"
         };
-        _context.State.Id = existingUser.UniqueId.ToString()!;
+        _context.RouteValues = new Dictionary<string, object?>
+        {
+            { "UserId", existingUser.UniqueId.ToString() }
+        };
         UserService.Users.Add(existingUser);
 
         // Act
@@ -115,8 +122,11 @@ public class UserServiceTests
         };
         UserService.Users.Add(existingUser);
         _context.State.Operations = "[ { \"op\": \"add\", \"path\": \"InvalidPath\", \"value\": \"Updated User\" } ]";
-        _context.State.Id = existingUser.UniqueId.ToString()!;
-
+        _context.RouteValues = new Dictionary<string, object?>
+        {
+            { "UserId", existingUser.UniqueId.ToString() }
+        };
+        
         // Act
         var action = () => _userService.PatchAsync(_context, _cancellationToken);
 
@@ -137,8 +147,11 @@ public class UserServiceTests
         };
         UserService.Users.Add(existingUser);
         _context.State.Operations = "[ { \"op\": \"add\", \"path\": \"UserName\", \"value\": \"Updated User\" } ]";
-        _context.State.Id = existingUser.UniqueId.ToString()!;
-
+        _context.RouteValues = new Dictionary<string, object?>
+        {
+            { "UserId", existingUser.UniqueId.ToString() }
+        };
+        
         // Act
         await _userService.PatchAsync(_context, _cancellationToken);
 
@@ -152,8 +165,11 @@ public class UserServiceTests
     public async Task DeleteAsync_ShouldThrowEntityNotFoundException_WhenUserDoesNotExist()
     {
         // Arrange
-        _context.State.Id = Guid.NewGuid().ToString();
-
+        _context.RouteValues = new Dictionary<string, object?>
+        {
+            { "UserId", Guid.NewGuid().ToString() }
+        };
+        
         // Act & Assert
         await Assert.ThrowsExceptionAsync<EntityNotFoundException>(() => _userService.DeleteAsync(_context, _cancellationToken));
     }
@@ -168,7 +184,10 @@ public class UserServiceTests
             UniqueId = Guid.NewGuid(),
             UserName = "userName1"
         };
-        _context.State.Id = existingUser.UniqueId.ToString()!;
+        _context.RouteValues = new Dictionary<string, object?>
+        {
+            { "UserId", existingUser.UniqueId.ToString() }
+        };
         UserService.Users.Add(existingUser);
 
         // Act

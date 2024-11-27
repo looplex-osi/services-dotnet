@@ -2,6 +2,7 @@ using System.Dynamic;
 using FluentAssertions;
 using Looplex.DotNet.Core.Common.Exceptions;
 using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Services;
+using Looplex.DotNet.Middlewares.ScimV2.Domain;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Groups;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
@@ -16,7 +17,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.UnitTests.Services;
 public class GroupServiceTests
 {
     private IGroupService _groupService = null!;
-    private IContext _context = null!;
+    private IScimV2Context _context = null!;
     private CancellationToken _cancellationToken;
 
     [TestInitialize]
@@ -24,7 +25,7 @@ public class GroupServiceTests
     {
         GroupService.Groups = [];
         _groupService = new GroupService();
-        _context = Substitute.For<IContext>();
+        _context = Substitute.For<IScimV2Context>();
         var state = new ExpandoObject();
         _context.State.Returns(state);
         var roles = new Dictionary<string, dynamic>();
@@ -60,8 +61,11 @@ public class GroupServiceTests
     public async Task GetByIdAsync_ShouldThrowEntityNotFoundException_WhenGroupDoesNotExist()
     {
         // Arrange
-        _context.State.Id = Guid.NewGuid().ToString();
-
+        _context.RouteValues = new Dictionary<string, object?>
+        {
+            { "GroupId", Guid.NewGuid().ToString() }
+        };
+        
         // Act & Assert
         await Assert.ThrowsExceptionAsync<EntityNotFoundException>(() => _groupService.GetByIdAsync(_context, _cancellationToken));
     }
@@ -76,7 +80,10 @@ public class GroupServiceTests
             UniqueId = Guid.NewGuid(),
             DisplayName = "displayName1"
         };
-        _context.State.Id = existingGroup.UniqueId.ToString()!;
+        _context.RouteValues = new Dictionary<string, object?>
+        {
+            { "GroupId", existingGroup.UniqueId.ToString() }
+        };
         GroupService.Groups.Add(existingGroup);
 
         // Act
@@ -113,7 +120,10 @@ public class GroupServiceTests
             UniqueId = Guid.NewGuid(),
             DisplayName = "displayName1"
         };
-        _context.State.Id = existingGroup.Id;
+        _context.RouteValues = new Dictionary<string, object?>
+        {
+            { "GroupId", existingGroup.UniqueId.ToString() }
+        };
         GroupService.Groups.Add(existingGroup);
         _context.State.Operations = "[ { \"op\": \"add\", \"path\": \"DisplayName\", \"value\": \"Updated Group\" } ]";
         _context.State.Id = existingGroup.UniqueId.ToString()!;
@@ -131,8 +141,10 @@ public class GroupServiceTests
     public async Task DeleteAsync_ShouldThrowEntityNotFoundException_WhenGroupDoesNotExist()
     {
         // Arrange
-        _context.State.Id = Guid.NewGuid().ToString();
-
+        _context.RouteValues = new Dictionary<string, object?>
+        {
+            { "GroupId", Guid.NewGuid().ToString() }
+        };
         // Act & Assert
         await Assert.ThrowsExceptionAsync<EntityNotFoundException>(() => _groupService.DeleteAsync(_context, _cancellationToken));
     }
@@ -148,6 +160,10 @@ public class GroupServiceTests
             DisplayName = "displayName1"
         };
         _context.State.Id = existingGroup.UniqueId.ToString()!;
+        _context.RouteValues = new Dictionary<string, object?>
+        {
+            { "GroupId", existingGroup.UniqueId.ToString() }
+        };
         GroupService.Groups.Add(existingGroup);
 
         // Act

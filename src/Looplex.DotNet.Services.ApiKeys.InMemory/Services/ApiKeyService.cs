@@ -4,7 +4,8 @@ using Looplex.DotNet.Core.Application.ExtensionMethods;
 using Looplex.DotNet.Core.Common.Exceptions;
 using Looplex.DotNet.Core.Common.Utils;
 using Looplex.DotNet.Middlewares.ApiKeys.Application.Abstractions.Services;
-using Looplex.DotNet.Middlewares.ApiKeys.Domain.Entities.ApiKeys;
+using Looplex.DotNet.Middlewares.ApiKeys.Domain.Entities.ClientCredentials;
+using Looplex.DotNet.Middlewares.ScimV2.Domain;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Looplex.DotNet.Services.ApiKeys.InMemory.Dtos;
@@ -21,9 +22,7 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
 {
     public class ApiKeyService(IConfiguration configuration) : IApiKeyService
     {
-        internal static IList<ApiKey> ApiKeys = [];
-
-        private readonly IConfiguration _configuration = configuration;
+        internal static IList<ClientCredential> ClientCredentials = [];
         
         public Task GetAllAsync(IContext context, CancellationToken cancellationToken)
         {
@@ -43,7 +42,7 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
 
             if (!context.SkipDefaultAction)
             {
-                var records = ApiKeys
+                var records = ClientCredentials
                     .Skip(Math.Min(0, startIndex - 1))
                     .Take(itemsPerPage)
                     .ToList();
@@ -53,11 +52,11 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
                     Resources = records.Select(r => (object)r).ToList(),
                     StartIndex = startIndex,
                     ItemsPerPage = itemsPerPage,
-                    TotalResults = ApiKeys.Count
+                    TotalResults = ClientCredentials.Count
                 };
-                context.State.Pagination.TotalCount = ApiKeys.Count;
+                context.State.Pagination.TotalCount = ClientCredentials.Count;
 
-                context.Result = JsonConvert.SerializeObject(result, ApiKey.Converter.Settings);
+                context.Result = JsonConvert.SerializeObject(result, ClientCredential.Converter.Settings);
             }
 
             context.Plugins.Execute<IAfterAction>(context, cancellationToken);
@@ -71,17 +70,17 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
         {
             cancellationToken.ThrowIfCancellationRequested();
             
-            var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
+            var id = Guid.Parse((string?)((IScimV2Context)context).RouteValues["ClientCredentialId"]!);
             context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
-            var apiKey = ApiKeys.FirstOrDefault(c => c.UniqueId == id);
-            if (apiKey == null)
+            var clientCredential = ClientCredentials.FirstOrDefault(c => c.UniqueId == id);
+            if (clientCredential == null)
             {
-                throw new EntityNotFoundException(nameof(ApiKey), id.ToString());
+                throw new EntityNotFoundException(nameof(ClientCredential), id.ToString());
             }
             context.Plugins.Execute<IValidateInput>(context, cancellationToken);
 
-            context.Roles.Add("ApiKey", apiKey);
+            context.Roles.Add("ClientCredential", clientCredential);
             context.Plugins.Execute<IDefineRoles>(context, cancellationToken);
 
             context.Plugins.Execute<IBind>(context, cancellationToken);
@@ -90,7 +89,7 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
 
             if (!context.SkipDefaultAction)
             {
-                context.Result = ((ApiKey)context.Roles["ApiKey"]).ToJson();
+                context.Result = ((ClientCredential)context.Roles["ClientCredential"]).ToJson();
             }
 
             context.Plugins.Execute<IAfterAction>(context, cancellationToken);
@@ -105,7 +104,7 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
             cancellationToken.ThrowIfCancellationRequested();
             
             var json = context.GetRequiredValue<string>("Resource");
-            var apiKey = Resource.FromJson<ApiKey>(json, out var messages);
+            var clientCredential = Resource.FromJson<ClientCredential>(json, out var messages);
             await context.Plugins.ExecuteAsync<IHandleInput>(context, cancellationToken);
 
             if (messages.Count > 0)
@@ -114,7 +113,7 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
             }
             await context.Plugins.ExecuteAsync<IValidateInput>(context, cancellationToken);
 
-            context.Roles.Add("ApiKey", apiKey);
+            context.Roles.Add("ClientCredential", clientCredential);
             await context.Plugins.ExecuteAsync<IDefineRoles>(context, cancellationToken);
 
             await context.Plugins.ExecuteAsync<IBind>(context, cancellationToken);
@@ -123,26 +122,26 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
 
             if (!context.SkipDefaultAction)
             {
-                apiKey = (ApiKey)context.Roles["ApiKey"];
+                clientCredential = (ClientCredential)context.Roles["ClientCredential"];
                 
                 var clientId = Guid.NewGuid();
                 
-                var clientSecretByteLength = int.Parse(_configuration["ClientSecretByteLength"]!);
+                var clientSecretByteLength = int.Parse(configuration["ClientSecretByteLength"]!);
 
                 var clientSecretBytes = new byte[clientSecretByteLength];
                 RandomNumberGenerator.Fill(clientSecretBytes);
 
-                apiKey.ClientId = clientId;
-                apiKey.Digest = DigestCredentials(clientId, clientSecretBytes)!;
+                clientCredential.ClientId = clientId;
+                clientCredential.Digest = DigestCredentials(clientId, clientSecretBytes)!;
 
-                apiKey.Id = (ApiKeys.Max(a => a.Id) ?? 0) + 1; // This should be generated by the DB
-                apiKey.UniqueId = Guid.NewGuid(); // This should be generated by the DB
-                ApiKeys.Add(apiKey); // Persist in storage
+                clientCredential.Id = (ClientCredentials.Max(a => a.Id) ?? 0) + 1; // This should be generated by the DB
+                clientCredential.UniqueId = Guid.NewGuid(); // This should be generated by the DB
+                ClientCredentials.Add(clientCredential); // Persist in storage
 
-                context.Result = context.Roles["ApiKey"].UniqueId.ToString();
+                context.Result = context.Roles["ClientCredential"].UniqueId.ToString();
 
                 var httpContext = (HttpContext)context.State.HttpContext;
-                await httpContext.Response.WriteAsJsonAsync(JsonConvert.SerializeObject(new ApiKeyDto
+                await httpContext.Response.WriteAsJsonAsync(JsonConvert.SerializeObject(new ClientCredentialDto
                 {
                     ClientId = clientId,
                     ClientSecret = Convert.ToBase64String(clientSecretBytes)
@@ -167,7 +166,7 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
 
             try
             {
-                var clientSecretDigestCost = int.Parse(_configuration["ClientSecretDigestCost"]!);
+                var clientSecretDigestCost = int.Parse(configuration["ClientSecretDigestCost"]!);
 
                 digest = Convert.ToBase64String(BCrypt.Generate(
                     clientSecretBytes,
@@ -188,10 +187,10 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
             
             var json = context.GetRequiredValue<string>("Operations");
             await GetByIdAsync(context, cancellationToken);
-            var apiKey = ((ApiKey)context.Roles["ApiKey"])
+            var clientCredential = ((ClientCredential)context.Roles["ClientCredential"])
                 .WithObservableProxy();
-            context.Roles["ApiKey"] = apiKey;
-            var operations = OperationTracker.FromJson(apiKey, json);
+            context.Roles["ClientCredential"] = clientCredential;
+            var operations = OperationTracker.FromJson(clientCredential, json);
             await context.Plugins.ExecuteAsync<IHandleInput>(context, cancellationToken);
 
             if (operations.Count == 0)
@@ -236,14 +235,14 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
         {
             cancellationToken.ThrowIfCancellationRequested();
             
-            var id = Guid.Parse(context.GetRequiredValue<string>("Id"));
+            var id = Guid.Parse((string?)((IScimV2Context)context).RouteValues["ClientCredentialId"]!);
             await context.Plugins.ExecuteAsync<IHandleInput>(context, cancellationToken);
 
             await GetByIdAsync(context, cancellationToken);
-            var apiKey = (ApiKey)context.Roles["ApiKey"];
-            if (apiKey == null)
+            var clientCredential = (ClientCredential)context.Roles["ClientCredential"];
+            if (clientCredential == null)
             {
-                throw new EntityNotFoundException(nameof(ApiKey), id.ToString());
+                throw new EntityNotFoundException(nameof(ClientCredential), id.ToString());
             }
             await context.Plugins.ExecuteAsync<IValidateInput>(context, cancellationToken);
             
@@ -255,7 +254,7 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
 
             if (!context.SkipDefaultAction)
             {
-                ApiKeys.Remove(context.Roles["ApiKey"]);
+                ClientCredentials.Remove(context.Roles["ClientCredential"]);
             }
 
             await context.Plugins.ExecuteAsync<IAfterAction>(context, cancellationToken);
@@ -272,10 +271,10 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
             context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
             var digest = DigestCredentials(clientId, Convert.FromBase64String(clientSecret));
-            var apiKey = ApiKeys.FirstOrDefault(c => c.Digest == digest);
-            if (apiKey != null && digest != null)
+            var clientCredential = ClientCredentials.FirstOrDefault(c => c.Digest == digest);
+            if (clientCredential != null && digest != null)
             {
-                context.Roles.Add("ApiKey", apiKey);
+                context.Roles.Add("ClientCredential", clientCredential);
             }
             context.Plugins.Execute<IValidateInput>(context, cancellationToken);
             
@@ -287,9 +286,9 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
 
             if (!context.SkipDefaultAction)
             {
-                if (context.Roles.TryGetValue("ApiKey", out var role))
+                if (context.Roles.TryGetValue("ClientCredential", out var role))
                 {
-                    context.Result = ((ApiKey)role).ToJson();;
+                    context.Result = ((ClientCredential)role).ToJson();;
                 }
             }
 

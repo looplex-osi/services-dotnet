@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace Looplex.DotNet.Services.ApiKeys.InMemory.Dtos;
 
-public class ApiKeyDto
+public class ClientCredentialDto
 {
     [JsonProperty("client_id")]
     public required Guid ClientId { get; init; }
