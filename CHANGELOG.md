@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="2.2.0"></a>
+## 2.2.0 (2024-12-04)
+
+### Features
+
+* added services for redis and sqldatabase (with connection provider per domain)
+
+### Bug Fixes
+
+* upgrade middleware packages
+
 <a name="2.1.2"></a>
 ## 2.1.2 (2024-11-27)
 
