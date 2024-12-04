@@ -4,17 +4,17 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<IsPackable>true</IsPackable>
-	<PackageId>Looplex.DotNet.Services.ApiKeys.InMemory</PackageId>
-	<Authors>Guilherme Câmara</Authors>
-	<Company>Looplex</Company>
-	<PackageTags>Looplex;Middleware;ApiKey;Service;InMemory</PackageTags>
-	<Description>
-		Contains a in memory implementation for the api-keys resource type.
-	</Description>
-	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-	<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <IsPackable>true</IsPackable>
+    <PackageId>Looplex.DotNet.Services.ApiKeys.InMemory</PackageId>
+    <Authors>Guilherme Câmara</Authors>
+    <Company>Looplex</Company>
+    <PackageTags>Looplex;Middleware;ApiKey;Service;InMemory</PackageTags>
+    <Description>
+      Contains a in memory implementation for the api-keys resource type.
+    </Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
   </PropertyGroup>
 
   <Target Name="PostPackNugetDeploy" AfterTargets="Pack" Condition="'$(Configuration)' == 'Debug' And '$(OS)' == 'Windows_NT'">
@@ -22,17 +22,18 @@
   </Target>
   <Target Name="PostPackNugetDeploy" AfterTargets="Pack" Condition="'$(Configuration)' == 'Debug' And '$(OS)' == 'Unix'">
     <Exec Command="dotnet nuget push &quot;$(OutputPath)$(PackageId).$(PackageVersion).nupkg&quot; --source ~/.aspnet/local-nuget-feed" />
- </Target>
+  </Target>
 
   <ItemGroup>
-      <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
-      <PackageReference Include="Looplex.DotNet.Core.Common" Version="3.0.0" />
-      <PackageReference Include="Looplex.DotNet.Core.Application" Version="3.0.0" />
-      <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2" Version="2.1.1" />
-      <PackageReference Include="Looplex.DotNet.Middlewares.ApiKeys.Domain" Version="2.1.1" />
-      <PackageReference Include="Looplex.DotNet.Middlewares.ApiKeys.Application.Abstractions" Version="2.1.1" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
-      <PackageReference Include="ScimPatch" Version="2.0.3" />
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
+    <PackageReference Include="Looplex.DotNet.Core.Common" Version="3.0.1" />
+    <PackageReference Include="Looplex.DotNet.Core.Application" Version="3.0.1" />
+    <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2" Version="2.1.2" />
+    <PackageReference Include="Looplex.DotNet.Middlewares.ApiKeys.Domain" Version="2.1.2" />
+    <PackageReference Include="Looplex.DotNet.Middlewares.ApiKeys.Application.Abstractions" Version="2.1.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
+    <PackageReference Include="ScimPatch" Version="2.0.3" />
   </ItemGroup>
 
 </Project>

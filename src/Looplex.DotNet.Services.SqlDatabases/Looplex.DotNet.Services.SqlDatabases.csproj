@@ -5,12 +5,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>true</IsPackable>
-    <PackageId>Looplex.DotNet.Services.ScimV2.InMemory</PackageId>
+    <PackageId>Looplex.DotNet.Services.SqlDatabases</PackageId>
     <Authors>Guilherme Câmara</Authors>
     <Company>Looplex</Company>
-    <PackageTags>Looplex;Middleware;ScimV2;User;Group;;InMemory</PackageTags>
+    <PackageTags>Looplex;Services;Sql;MsSql;SqlServer</PackageTags>
     <Description>
-      Contains a in memory implementation for the User and Group resource types.
+      Contains a implementation to access a Sql Server database.
     </Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
@@ -23,15 +23,17 @@
   <Target Name="PostPackNugetDeploy" AfterTargets="Pack" Condition="'$(Configuration)' == 'Debug' And '$(OS)' == 'Unix'">
     <Exec Command="dotnet nuget push &quot;$(OutputPath)$(PackageId).$(PackageVersion).nupkg&quot; --source ~/.aspnet/local-nuget-feed" />
   </Target>
+  
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.35" />
+    <PackageReference Include="Looplex.DotNet.Core.Application.Abstractions" Version="3.0.1" />
+    <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2.Domain" Version="2.1.2" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.1" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.0" />
+  </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Looplex.DotNet.Core.Common" Version="3.0.1" />
-    <PackageReference Include="Looplex.DotNet.Core.Application" Version="3.0.1" />
-    <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2" Version="2.1.2" />
-    <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2.Domain" Version="2.1.2" />
-    <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions" Version="2.1.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
-    <PackageReference Include="ScimPatch" Version="2.0.3" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
 </Project>
