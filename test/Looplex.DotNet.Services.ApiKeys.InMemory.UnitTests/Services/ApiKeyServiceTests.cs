@@ -4,8 +4,8 @@ using FluentAssertions;
 using Looplex.DotNet.Core.Common.Exceptions;
 using Looplex.DotNet.Middlewares.ApiKeys.Application.Abstractions.Services;
 using Looplex.DotNet.Middlewares.ApiKeys.Domain.Entities.ClientCredentials;
+using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Providers;
 using Looplex.DotNet.Middlewares.ScimV2.Domain;
-using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Looplex.DotNet.Services.ApiKeys.InMemory.Dtos;
 using Looplex.DotNet.Services.ApiKeys.InMemory.Services;
@@ -20,6 +20,7 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.UnitTests.Services;
 public class ApiKeyServiceTests
 {
     private IConfiguration _configuration = null!;
+    private IJsonSchemaProvider _jsonSchemaProvider = null!;
     private IApiKeyService _apiKeyService = null!;
     private IScimV2Context _context = null!;
     private CancellationToken _cancellationToken;
@@ -34,7 +35,8 @@ public class ApiKeyServiceTests
         _memoryStream = new MemoryStream();
         _httpContext.Response.Body = _memoryStream;
         _configuration = Substitute.For<IConfiguration>();
-        _apiKeyService = new ApiKeyService(_configuration);
+        _jsonSchemaProvider = Substitute.For<IJsonSchemaProvider>();
+        _apiKeyService = new ApiKeyService(_configuration, _jsonSchemaProvider);
         _context = Substitute.For<IScimV2Context>();
         dynamic state = new ExpandoObject();
         _context.State.Returns(state);
@@ -42,9 +44,6 @@ public class ApiKeyServiceTests
         var roles = new Dictionary<string, dynamic>();
         _context.Roles.Returns(roles);
         _cancellationToken = new CancellationToken();
-        
-        if (!Schemas.ContainsKey(typeof(ClientCredential)))
-            Schemas.Add(typeof(ClientCredential), "{}");
     }
 
     [TestMethod]
@@ -120,6 +119,11 @@ public class ApiKeyServiceTests
         _context.State.Resource = clientCredentialJson;
         _configuration["ClientSecretByteLength"].Returns("72"); 
         _configuration["ClientSecretDigestCost"].Returns("4"); 
+        _configuration["JsonSchemaIdForClientCredential"].Returns("clientCredentialSchemaId"); 
+
+        _jsonSchemaProvider
+            .ResolveJsonSchemaAsync(Arg.Any<IScimV2Context>(), "clientCredentialSchemaId")
+            .Returns("{}");
         
         // Act
         await _apiKeyService.CreateAsync(_context, _cancellationToken);
@@ -248,12 +252,16 @@ public class ApiKeyServiceTests
         _context.State.Resource = clientCredentialJson;
         _configuration["ClientSecretByteLength"].Returns("72"); 
         _configuration["ClientSecretDigestCost"].Returns("4"); 
+        _configuration["JsonSchemaIdForClientCredential"].Returns("clientCredentialSchemaId"); 
+        _jsonSchemaProvider
+            .ResolveJsonSchemaAsync(Arg.Any<IScimV2Context>(), "clientCredentialSchemaId")
+            .Returns("{}");
         await _apiKeyService.CreateAsync(_context, _cancellationToken);
         _memoryStream.Seek(0, SeekOrigin.Begin);
         var responseBody = await new StreamReader(_memoryStream, Encoding.UTF8).ReadToEndAsync(CancellationToken.None);
         var clientCredentialDto = JsonConvert.DeserializeObject<ClientCredentialDto>(responseBody)!;
         _context.Roles.Remove("ClientCredential"); // Because we are using the same mock context
-        _context.State.ClientId = clientCredentialDto.ClientId.ToString()!;
+        _context.State.ClientId = clientCredentialDto.ClientId.ToString();
         _context.State.ClientSecret = clientCredentialDto.ClientSecret;
 
         // Act

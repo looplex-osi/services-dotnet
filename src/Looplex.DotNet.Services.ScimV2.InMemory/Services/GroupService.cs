@@ -1,5 +1,6 @@
 ﻿using Looplex.DotNet.Core.Application.ExtensionMethods;
 using Looplex.DotNet.Core.Common.Exceptions;
+using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Providers;
 using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Services;
 using Looplex.DotNet.Middlewares.ScimV2.Domain;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
@@ -8,13 +9,18 @@ using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Looplex.OpenForExtension.Abstractions.Commands;
 using Looplex.OpenForExtension.Abstractions.Contexts;
 using Looplex.OpenForExtension.Abstractions.ExtensionMethods;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using ScimPatch;
 
 namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
 {
-    public class GroupService() : IGroupService
+    public class GroupService(
+        IConfiguration configuration,
+        IJsonSchemaProvider jsonSchemaProvider) : IGroupService
     {
+        private const string JsonSchemaIdForGroupKey = "JsonSchemaIdForGroup";
+        
         internal static IList<Group> Groups = [];
         
         public Task GetAllAsync(IContext context, CancellationToken cancellationToken)
@@ -92,27 +98,29 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
             return Task.CompletedTask;
         }
         
-        public Task CreateAsync(IContext context, CancellationToken cancellationToken)
+        public async Task CreateAsync(IContext context, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
+            var schemaId = configuration[JsonSchemaIdForGroupKey]!;
+            var jsonSchema = await jsonSchemaProvider.ResolveJsonSchemaAsync(context, schemaId);
             var json = context.GetRequiredValue<string>("Resource");
             var group = Resource
-                .FromJson<Group>(json, out var messages);
-            context.Plugins.Execute<IHandleInput>(context, cancellationToken);
+                .FromJson<Group>(json, jsonSchema, out var messages);
+            await context.Plugins.ExecuteAsync<IHandleInput>(context, cancellationToken);
 
             if (messages.Count > 0)
             {
                 throw new EntityInvalidException(messages.ToList());
             }
-            context.Plugins.Execute<IValidateInput>(context, cancellationToken);
+            await context.Plugins.ExecuteAsync<IValidateInput>(context, cancellationToken);
 
             context.Roles.Add("Group", group);
-            context.Plugins.Execute<IDefineRoles>(context, cancellationToken);
+            await context.Plugins.ExecuteAsync<IDefineRoles>(context, cancellationToken);
 
-            context.Plugins.Execute<IBind>(context, cancellationToken);
+            await context.Plugins.ExecuteAsync<IBind>(context, cancellationToken);
 
-            context.Plugins.Execute<IBeforeAction>(context, cancellationToken);
+            await context.Plugins.ExecuteAsync<IBeforeAction>(context, cancellationToken);
 
             if (!context.SkipDefaultAction)
             {
@@ -124,11 +132,9 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
                 context.Result = context.Roles["Group"].UniqueId.ToString();
             }
 
-            context.Plugins.Execute<IAfterAction>(context, cancellationToken);
+            await context.Plugins.ExecuteAsync<IAfterAction>(context, cancellationToken);
 
-            context.Plugins.Execute<IReleaseUnmanagedResources>(context, cancellationToken);
-
-            return Task.CompletedTask;
+            await context.Plugins.ExecuteAsync<IReleaseUnmanagedResources>(context, cancellationToken);
         }
         
         public Task UpdateAsync(IContext context, CancellationToken cancellationToken)

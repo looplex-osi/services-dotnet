@@ -5,6 +5,7 @@ using Looplex.DotNet.Core.Common.Exceptions;
 using Looplex.DotNet.Core.Common.Utils;
 using Looplex.DotNet.Middlewares.ApiKeys.Application.Abstractions.Services;
 using Looplex.DotNet.Middlewares.ApiKeys.Domain.Entities.ClientCredentials;
+using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Providers;
 using Looplex.DotNet.Middlewares.ScimV2.Domain;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
@@ -20,8 +21,12 @@ using ScimPatch;
 
 namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
 {
-    public class ApiKeyService(IConfiguration configuration) : IApiKeyService
+    public class ApiKeyService(
+        IConfiguration configuration,
+        IJsonSchemaProvider jsonSchemaProvider) : IApiKeyService
     {
+        private const string JsonSchemaIdForClientCredentialKey = "JsonSchemaIdForClientCredential";
+        
         internal static IList<ClientCredential> ClientCredentials = [];
         
         public Task GetAllAsync(IContext context, CancellationToken cancellationToken)
@@ -104,7 +109,9 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
             cancellationToken.ThrowIfCancellationRequested();
             
             var json = context.GetRequiredValue<string>("Resource");
-            var clientCredential = Resource.FromJson<ClientCredential>(json, out var messages);
+            var schemaId = configuration[JsonSchemaIdForClientCredentialKey]!;
+            var jsonSchema = await jsonSchemaProvider.ResolveJsonSchemaAsync(context, schemaId);
+            var clientCredential = Resource.FromJson<ClientCredential>(json, jsonSchema, out var messages);
             await context.Plugins.ExecuteAsync<IHandleInput>(context, cancellationToken);
 
             if (messages.Count > 0)
@@ -288,7 +295,7 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
             {
                 if (context.Roles.TryGetValue("ClientCredential", out var role))
                 {
-                    context.Result = ((ClientCredential)role).ToJson();;
+                    context.Result = ((ClientCredential)role).ToJson();
                 }
             }
 

@@ -1,12 +1,13 @@
 using System.Dynamic;
 using FluentAssertions;
 using Looplex.DotNet.Core.Common.Exceptions;
+using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Providers;
 using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Services;
 using Looplex.DotNet.Middlewares.ScimV2.Domain;
-using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Users;
 using Looplex.DotNet.Services.ScimV2.InMemory.Services;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using NSubstitute;
 
@@ -16,13 +17,17 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.UnitTests.Services;
 public class UserServiceTests
 {
     private IUserService _userService = null!;
+    private IConfiguration _configuration = null!;
+    private IJsonSchemaProvider _jsonSchemaProvider = null!;
     private IScimV2Context _context = null!;
     private CancellationToken _cancellationToken;
 
     [TestInitialize]
     public void Setup()
     {
-        _userService = new UserService();
+        _configuration = Substitute.For<IConfiguration>();
+        _jsonSchemaProvider = Substitute.For<IJsonSchemaProvider>();
+        _userService = new UserService(_configuration, _jsonSchemaProvider);
         UserService.Users = [];
         _context = Substitute.For<IScimV2Context>();
         var state = new ExpandoObject();
@@ -98,7 +103,11 @@ public class UserServiceTests
         // Arrange
         var userJson = $"{{ \"userName\": \"Test User\" }}";
         _context.State.Resource = userJson;
-        Schemas.Add(typeof(User), "{}");
+        _configuration["JsonSchemaIdForUser"].Returns("userSchemaId"); 
+
+        _jsonSchemaProvider
+            .ResolveJsonSchemaAsync(Arg.Any<IScimV2Context>(), "userSchemaId")
+            .Returns("{}");
         
         // Act
         await _userService.CreateAsync(_context, _cancellationToken);

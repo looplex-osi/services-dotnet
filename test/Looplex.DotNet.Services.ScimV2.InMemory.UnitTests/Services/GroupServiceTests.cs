@@ -1,12 +1,13 @@
 using System.Dynamic;
 using FluentAssertions;
 using Looplex.DotNet.Core.Common.Exceptions;
+using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Providers;
 using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Services;
 using Looplex.DotNet.Middlewares.ScimV2.Domain;
-using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Groups;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Looplex.DotNet.Services.ScimV2.InMemory.Services;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using NSubstitute;
 
@@ -16,14 +17,18 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.UnitTests.Services;
 public class GroupServiceTests
 {
     private IGroupService _groupService = null!;
+    private IConfiguration _configuration = null!;
+    private IJsonSchemaProvider _jsonSchemaProvider = null!;
     private IScimV2Context _context = null!;
     private CancellationToken _cancellationToken;
 
     [TestInitialize]
     public void Setup()
     {
+        _configuration = Substitute.For<IConfiguration>();
+        _jsonSchemaProvider = Substitute.For<IJsonSchemaProvider>();
         GroupService.Groups = [];
-        _groupService = new GroupService();
+        _groupService = new GroupService(_configuration, _jsonSchemaProvider);
         _context = Substitute.For<IScimV2Context>();
         var state = new ExpandoObject();
         _context.State.Returns(state);
@@ -98,7 +103,11 @@ public class GroupServiceTests
         // Arrange
         var groupJson = $"{{ \"displayName\": \"Test Group\" }}";
         _context.State.Resource = groupJson;
-        Schemas.Add(typeof(Group), "{}");
+        _configuration["JsonSchemaIdForGroup"].Returns("groupSchemaId"); 
+
+        _jsonSchemaProvider
+            .ResolveJsonSchemaAsync(Arg.Any<IScimV2Context>(), "groupSchemaId")
+            .Returns("{}");
         
         // Act
         await _groupService.CreateAsync(_context, _cancellationToken);
