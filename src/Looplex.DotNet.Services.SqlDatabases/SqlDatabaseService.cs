@@ -6,7 +6,7 @@ using Microsoft.Data.SqlClient;
 
 namespace Looplex.DotNet.Services.SqlDatabases;
 
-public class SqlDatabasesService(SqlConnection connection) : ISqlDatabaseService
+public class SqlDatabaseService(SqlConnection connection) : ISqlDatabaseService
 {
     public void OpenConnection()
     {

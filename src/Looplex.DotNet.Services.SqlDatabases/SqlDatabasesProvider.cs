@@ -24,7 +24,7 @@ public class SqlDatabasesProvider(
                 var routingConnString = configuration[RoutingDatabaseConnectionStringKey];
 
                 var connection = new SqlConnection(routingConnString);
-                _routingDatabaseService = new SqlDatabasesService(connection);
+                _routingDatabaseService = new SqlDatabaseService(connection);
             }
 
             return _routingDatabaseService;
@@ -57,6 +57,6 @@ public class SqlDatabasesProvider(
             .GetSecretAsync(customerConnStringKeyVaultId);
         
         var connection = new SqlConnection(customerConnString);
-        return new SqlDatabasesService(connection);
+        return new SqlDatabaseService(connection);
     }
 }

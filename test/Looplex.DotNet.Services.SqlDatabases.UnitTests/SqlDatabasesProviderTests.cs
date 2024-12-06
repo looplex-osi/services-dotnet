@@ -68,7 +68,7 @@ public class SqlDatabasesProviderTests
 
         // Assert
         result.Should().NotBeNull();
-        result.Should().BeOfType<SqlDatabasesService>();
+        result.Should().BeOfType<SqlDatabaseService>();
     }
 
     [TestMethod]
