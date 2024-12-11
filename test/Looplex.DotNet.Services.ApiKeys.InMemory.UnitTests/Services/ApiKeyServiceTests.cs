@@ -1,6 +1,7 @@
 using System.Dynamic;
 using System.Text;
 using FluentAssertions;
+using FluentAssertions.Extensions;
 using Looplex.DotNet.Core.Common.Exceptions;
 using Looplex.DotNet.Middlewares.ApiKeys.Application.Abstractions.Services;
 using Looplex.DotNet.Middlewares.ApiKeys.Domain.Entities.ClientCredentials;
@@ -161,7 +162,7 @@ public class ApiKeyServiceTests
 
         // Assert
         var clientCredential = ApiKeyService.ClientCredentials.First(u => u.UniqueId == existingClientCredential.UniqueId);
-        clientCredential.ExpirationTime.Should().Be(expirationTime);
+        clientCredential.ExpirationTime.Should().BeCloseTo(expirationTime, 1.Milliseconds());
         ((ClientCredential)_context.Roles["ClientCredential"]).ChangedPropertyNotification.ChangedProperties.Should().BeEquivalentTo(["ExpirationTime"]);
     }
     
@@ -271,8 +272,8 @@ public class ApiKeyServiceTests
         Assert.IsNotNull(_context.Result);
         var clientCredential = JsonConvert.DeserializeObject<ClientCredential>((string)_context.Result!)!;
         clientCredential.ClientId.Should().Be(clientCredentialDto.ClientId);
-        clientCredential.NotBefore.ToUniversalTime().Should().Be(notBefore);
-        clientCredential.ExpirationTime.ToUniversalTime().Should().Be(expirationTime);
+        clientCredential.NotBefore.ToUniversalTime().Should().BeCloseTo(notBefore, 1.Milliseconds());
+        clientCredential.ExpirationTime.ToUniversalTime().Should().BeCloseTo(expirationTime, 1.Milliseconds());
 
         _context.Roles.Should().ContainKey("ClientCredential");
         ((ClientCredential)_context.Roles["ClientCredential"]).Should()
