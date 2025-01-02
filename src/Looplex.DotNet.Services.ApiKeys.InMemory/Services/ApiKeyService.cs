@@ -9,6 +9,7 @@ using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Providers;
 using Looplex.DotNet.Middlewares.ScimV2.Domain;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
+using Looplex.DotNet.Middlewares.ScimV2.Domain.ExtensionMethods;
 using Looplex.DotNet.Services.ApiKeys.InMemory.Dtos;
 using Looplex.OpenForExtension.Abstractions.Commands;
 using Looplex.OpenForExtension.Abstractions.Contexts;
@@ -75,7 +76,7 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
         {
             cancellationToken.ThrowIfCancellationRequested();
             
-            var id = Guid.Parse((string?)((IScimV2Context)context).RouteValues["ClientCredentialId"]!);
+            var id = Guid.Parse((string?)context.AsScimV2Context().RouteValues["ClientCredentialId"]!);
             context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
             var clientCredential = ClientCredentials.FirstOrDefault(c => c.UniqueId == id);
@@ -242,7 +243,7 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
         {
             cancellationToken.ThrowIfCancellationRequested();
             
-            var id = Guid.Parse((string?)((IScimV2Context)context).RouteValues["ClientCredentialId"]!);
+            var id = Guid.Parse((string?)context.AsScimV2Context().RouteValues["ClientCredentialId"]!);
             await context.Plugins.ExecuteAsync<IHandleInput>(context, cancellationToken);
 
             await GetByIdAsync(context, cancellationToken);

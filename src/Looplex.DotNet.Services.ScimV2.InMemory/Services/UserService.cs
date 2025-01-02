@@ -6,6 +6,7 @@ using Looplex.DotNet.Middlewares.ScimV2.Domain;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Users;
+using Looplex.DotNet.Middlewares.ScimV2.Domain.ExtensionMethods;
 using Looplex.OpenForExtension.Abstractions.Commands;
 using Looplex.OpenForExtension.Abstractions.Contexts;
 using Looplex.OpenForExtension.Abstractions.ExtensionMethods;
@@ -70,7 +71,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var id = Guid.Parse((string?)((IScimV2Context)context).RouteValues["UserId"]!);
+            var id = Guid.Parse((string?)context.AsScimV2Context().RouteValues["UserId"]!);
             context.Plugins.Execute<IHandleInput>(context, cancellationToken);
 
             var user = Users.FirstOrDefault(u => u.UniqueId == id);
@@ -189,7 +190,7 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var id = Guid.Parse((string?)((IScimV2Context)context).RouteValues["UserId"]!);
+            var id = Guid.Parse((string?)context.AsScimV2Context().RouteValues["UserId"]!);
             await context.Plugins.ExecuteAsync<IHandleInput>(context, cancellationToken);
 
             await GetByIdAsync(context, cancellationToken);
