@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="2.2.7"></a>
+## 2.2.7 (2025-01-07)
+
 <a name="2.2.6"></a>
 ## 2.2.6 (2025-01-02)
 
