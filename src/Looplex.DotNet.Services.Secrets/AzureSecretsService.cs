@@ -9,7 +9,7 @@ public class AzureSecretsService (SecretClient secretClient) : ISecretsService
     public async Task<string?> GetSecretAsync(string secretName)
     {          
         if (string.IsNullOrEmpty(secretName))
-            throw new ArgumentNullException("The secret name is required.");
+            throw new Exception("The secret name is required.");
 
         try
         {
