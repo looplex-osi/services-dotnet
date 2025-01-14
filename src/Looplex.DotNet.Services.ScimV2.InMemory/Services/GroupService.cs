@@ -2,7 +2,6 @@
 using Looplex.DotNet.Core.Common.Exceptions;
 using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Providers;
 using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Services;
-using Looplex.DotNet.Middlewares.ScimV2.Domain;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Groups;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
