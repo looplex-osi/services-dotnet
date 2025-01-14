@@ -40,7 +40,7 @@ public class AzureSecretsService : ISecretsService
         
         string secretHash = ComputeHash(secretName) ;
 
-        _logger.LogInformation($"Retrieving secret: {secretHash}", secretHash);
+        _logger.LogInformation($"Retrieving secret with hash: {secretHash}", secretHash);
 
         return await _retryPolicy.ExecuteAsync(async () =>
         {
@@ -57,7 +57,7 @@ public class AzureSecretsService : ISecretsService
             }
             catch (RequestFailedException ex)
             {                
-                _logger.LogError(ex, $"Failed to retrieve secret: {secretHash}", secretHash);
+                _logger.LogError(ex, $"Failed to retrieve secret with hash: {secretHash}", secretHash);
                 throw; 
             }
         });
