@@ -40,7 +40,14 @@ public class SecretsHealthCheck : IHealthCheck
                     cancellationToken);
 
                 TimeSpan cacheTimeExpiration = token.ExpiresOn.UtcDateTime - DateTime.UtcNow;
-                _cache.Set(TokenCacheKey, token, cacheTimeExpiration);
+                
+                // Add 5-minute buffer to refresh token before it expires
+                var bufferTime = TimeSpan.FromMinutes(5);
+                var effectiveExpiration = cacheTimeExpiration > bufferTime
+                                    ? cacheTimeExpiration - bufferTime
+                                    : cacheTimeExpiration;
+
+                _cache.Set(TokenCacheKey, token, effectiveExpiration);                
             }
 
             return HealthCheckResult.Healthy($"Key vault service is healthy.");
