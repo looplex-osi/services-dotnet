@@ -1,5 +1,6 @@
 ﻿using Azure.Security.KeyVault.Secrets;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
@@ -10,13 +11,15 @@ namespace Looplex.DotNet.Services.Secrets.UnitTests
     public class AzureSecretsServiceTests ()
     {
         private AzureSecretsService _azureSecretService = null!;        
-        private SecretClient _secretClient = null!;  
+        private SecretClient _secretClient = null!; 
+        private ILogger<AzureSecretsService> _logger = null!;
         
         [TestInitialize]
         public void Setup()
         {            
-            _secretClient = Substitute.For<SecretClient>();            
-            _azureSecretService = new AzureSecretsService(_secretClient);
+            _secretClient = Substitute.For<SecretClient>();
+            _logger = Substitute.For<ILogger<AzureSecretsService>>();
+            _azureSecretService = new AzureSecretsService(_secretClient, _logger);
         }
 
         [DataRow("looplex.com.br")]
@@ -86,6 +89,6 @@ namespace Looplex.DotNet.Services.Secrets.UnitTests
             //Assert
             var ex = Assert.ThrowsExceptionAsync<Exception>(act);
             Assert.AreEqual("Response<KeyVaultSecret> can not be null", ex.Result.Message);
-        }
+        }        
     }
 }

@@ -4,6 +4,17 @@ namespace Looplex.DotNet.Services.Secrets
 {
     /// <summary>
     /// Configuration options for Azure Key Vault secrets service.
+    /// +/// </summary>
+    /// <remarks>
+    /// This class is configured using the "Azure:KeyVault" configuration section.
+    /// 
+    /// Example usage:
+    /// <code>
+    /// services.Configure<AzureSecretsOptions>(configuration.GetSection("Azure:KeyVault"));
+    /// </code>
+    /// 
+    /// For more information about Azure Key Vault, see:
+    /// https://learn.microsoft.com/azure/key-vault/
     /// </summary>
     public sealed class AzureSecretsOptions
     {
