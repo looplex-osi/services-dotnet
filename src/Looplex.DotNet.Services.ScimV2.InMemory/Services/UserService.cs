@@ -2,7 +2,6 @@
 using Looplex.DotNet.Core.Common.Exceptions;
 using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Providers;
 using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Services;
-using Looplex.DotNet.Middlewares.ScimV2.Domain;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Users;
@@ -20,6 +19,8 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.Services
         IConfiguration configuration,
         IJsonSchemaProvider jsonSchemaProvider) : IUserService
     {
+        // TODO inherit BaseCrudService 
+
         private const string JsonSchemaIdForUserKey = "JsonSchemaIdForUser";
 
         internal static IList<User> Users = [];

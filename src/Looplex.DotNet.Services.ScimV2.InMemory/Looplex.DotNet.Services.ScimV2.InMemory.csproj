@@ -15,11 +15,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Looplex.DotNet.Core.Common" Version="3.0.4" />
-    <PackageReference Include="Looplex.DotNet.Core.Application" Version="3.0.4" />
-    <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2" Version="2.3.0" />
-    <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2.Domain" Version="2.3.0" />
-    <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions" Version="2.3.0" />
+    <PackageReference Include="Looplex.DotNet.Core.Common" Version="3.0.5" />
+    <PackageReference Include="Looplex.DotNet.Core.Application" Version="3.0.5" />
+    <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2" Version="2.4.4" />
+    <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2.Domain" Version="2.4.4" />
+    <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions" Version="2.4.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
     <PackageReference Include="ScimPatch" Version="2.0.3" />
   </ItemGroup>

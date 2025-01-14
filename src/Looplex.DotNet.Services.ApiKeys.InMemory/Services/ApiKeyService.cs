@@ -6,7 +6,6 @@ using Looplex.DotNet.Core.Common.Utils;
 using Looplex.DotNet.Middlewares.ApiKeys.Application.Abstractions.Services;
 using Looplex.DotNet.Middlewares.ApiKeys.Domain.Entities.ClientCredentials;
 using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Providers;
-using Looplex.DotNet.Middlewares.ScimV2.Domain;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.ExtensionMethods;
@@ -26,6 +25,8 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
         IConfiguration configuration,
         IJsonSchemaProvider jsonSchemaProvider) : IApiKeyService
     {
+        // TODO inherit BaseCrudService 
+        
         private const string JsonSchemaIdForClientCredentialKey = "JsonSchemaIdForClientCredential";
         
         internal static IList<ClientCredential> ClientCredentials = [];
