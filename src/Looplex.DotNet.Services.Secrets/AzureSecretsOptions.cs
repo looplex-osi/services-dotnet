@@ -1,4 +1,4 @@
-﻿using Looplex.DotNet.Services.Secrets.Exceptions;
+﻿using Microsoft.Extensions.Options;
 
 namespace Looplex.DotNet.Services.Secrets
 {
