@@ -35,10 +35,10 @@ public class AzureSecretsService : ISecretsService
 
     public async Task<string?> GetSecretAsync(string secretName)
     {
-        string SecretHash = ComputeHash(secretName);
-
         if (string.IsNullOrEmpty(secretName))
             throw new SecretValidationException("The secret name is required.");
+        
+        string SecretHash = ComputeHash(secretName) ;
 
         _logger.LogInformation($"Retrieving secret: {SecretHash}");
 

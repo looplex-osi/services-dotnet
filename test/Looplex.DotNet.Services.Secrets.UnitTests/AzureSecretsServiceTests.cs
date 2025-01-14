@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
+using Looplex.DotNet.Services.Secrets.Exceptions;
 
 namespace Looplex.DotNet.Services.Secrets.UnitTests
 {
@@ -40,11 +41,10 @@ namespace Looplex.DotNet.Services.Secrets.UnitTests
             //Assert
             result.Should().Be(returnedValue);
         }
-                
-        [DataRow(null)]
+        
         [DataRow("")]
         [TestMethod]
-        public void GetSecretAsync_ThrowException_WhenSecretNameIsNullOrEmpty(string secretName)
+        public void GetSecretAsync_ThrowException_WhenSecretNameIsEmpty(string secretName)
         {
             //Arrange
             _secretClient.GetSecretAsync(secretName);
@@ -53,7 +53,22 @@ namespace Looplex.DotNet.Services.Secrets.UnitTests
             var act = () => _azureSecretService.GetSecretAsync(secretName);
 
             //Assert
-            var ex = Assert.ThrowsExceptionAsync<Exception>(act);
+            var ex = Assert.ThrowsExceptionAsync<SecretValidationException>(act);
+            Assert.AreEqual("The secret name is required.", ex.Result.Message);
+        }
+
+        [DataRow(null)]        
+        [TestMethod]
+        public void GetSecretAsync_ThrowException_WhenSecretNameIsNull(string secretName)
+        {
+            //Arrange
+            _secretClient.GetSecretAsync(secretName);
+
+            //Act
+            var act = () => _azureSecretService.GetSecretAsync(secretName);
+
+            //Assert
+            var ex = Assert.ThrowsExceptionAsync<SecretValidationException>(act);
             Assert.AreEqual("The secret name is required.", ex.Result.Message);
         }
 
@@ -70,8 +85,8 @@ namespace Looplex.DotNet.Services.Secrets.UnitTests
             var act = () => _azureSecretService.GetSecretAsync(secretName);
 
             //Assert
-            var ex = Assert.ThrowsExceptionAsync<Exception>(act);
-            Assert.AreEqual("KeyVaultSecret can not be null", ex.Result.Message);
+            var ex = Assert.ThrowsExceptionAsync<KeyVaultException>(act);
+            Assert.AreEqual("The secret value can not be null", ex.Result.Message);
         }
 
         [DataRow("nomeinexistente.com.br")]
@@ -87,8 +102,8 @@ namespace Looplex.DotNet.Services.Secrets.UnitTests
             var act = () => _azureSecretService.GetSecretAsync(secretName);
 
             //Assert
-            var ex = Assert.ThrowsExceptionAsync<Exception>(act);
-            Assert.AreEqual("Response<KeyVaultSecret> can not be null", ex.Result.Message);
+            var ex = Assert.ThrowsExceptionAsync<KeyVaultException>(act);
+            Assert.AreEqual("The response from Azure Key Vault can not be null", ex.Result.Message);
         }        
     }
 }

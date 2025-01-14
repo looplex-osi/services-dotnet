@@ -1,8 +1,16 @@
 ﻿namespace Looplex.DotNet.Services.Secrets.Exceptions
 {
-    internal class SecretValidationException : Exception
-    {        
-        public SecretValidationException(string exception) : base()
+    public class SecretValidationException : Exception
+    {
+        public SecretValidationException() : base()
+        {
+
+        }
+        public SecretValidationException(string message) : base(message)
+        {
+
+        }
+        public SecretValidationException(string message, Exception innerException) : base(message, innerException)
         {
 
         }
