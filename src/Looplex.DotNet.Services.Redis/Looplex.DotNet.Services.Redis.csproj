@@ -18,7 +18,7 @@
     <PackageReference Include="Looplex.DotNet.Core.Application.Abstractions" Version="3.0.5" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.0" />
-    <PackageReference Include="StackExchange.Redis" Version="2.8.22" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
   </ItemGroup>
 
 </Project>

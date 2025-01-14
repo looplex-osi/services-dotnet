@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.5.0" />
     <PackageReference Include="Looplex.DotNet.Core.Common" Version="3.0.5" />
     <PackageReference Include="Looplex.DotNet.Core.Application" Version="3.0.5" />
     <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2" Version="2.4.4" />
