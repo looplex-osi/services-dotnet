@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="2.2.8"></a>
+## 2.2.8 (2025-01-14)
+
+### Bug Fixes
+
+* upgrade middleware packages
+* upgrade packages
+
 <a name="2.2.7"></a>
 ## 2.2.7 (2025-01-07)
 
