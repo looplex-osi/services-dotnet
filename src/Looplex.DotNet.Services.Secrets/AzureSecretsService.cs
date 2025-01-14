@@ -65,6 +65,9 @@ public class AzureSecretsService : ISecretsService
 
     public string ComputeHash(string input)
     {
+        if (string.IsNullOrEmpty(input))
+            throw new ArgumentNullException(nameof(input));
+
         string hash = string.Empty;
 
         using (SHA256 sha256Hash = SHA256.Create())
