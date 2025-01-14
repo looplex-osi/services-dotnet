@@ -38,9 +38,9 @@ public class AzureSecretsService : ISecretsService
         if (string.IsNullOrEmpty(secretName))
             throw new SecretValidationException("The secret name is required.");
         
-        string SecretHash = ComputeHash(secretName) ;
+        string secretHash = ComputeHash(secretName) ;
 
-        _logger.LogInformation($"Retrieving secret: {SecretHash}");
+        _logger.LogInformation($"Retrieving secret: {secretHash}", secretHash);
 
         return await _retryPolicy.ExecuteAsync(async () =>
         {
@@ -57,7 +57,7 @@ public class AzureSecretsService : ISecretsService
             }
             catch (RequestFailedException ex)
             {                
-                _logger.LogError(ex, $"Failed to retrieve secret: {SecretHash}");
+                _logger.LogError(ex, $"Failed to retrieve secret: {secretHash}", secretHash);
                 throw; 
             }
         });
