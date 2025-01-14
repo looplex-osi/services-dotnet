@@ -3,6 +3,7 @@ using Azure.Security.KeyVault.Secrets;
 using Looplex.DotNet.Core.Application.Abstractions.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 
 namespace Looplex.DotNet.Services.Secrets.ExtensionMethods;
@@ -28,6 +29,9 @@ public static class SecretsExtensionMethods
     public static void AddSecretsHealthChecks(this IServiceCollection services)
     {
         services.AddHealthChecks()
-            .AddCheck<SecretsHealthCheck>("Default");
+            .AddCheck<SecretsHealthCheck>(
+                name: "azure-key-vault",
+                failureStatus: HealthStatus.Degraded,
+                tags: new[] { "azure", "secrets" });            
     }
 }
