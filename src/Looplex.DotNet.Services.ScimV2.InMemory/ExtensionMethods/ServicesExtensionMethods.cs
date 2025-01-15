@@ -2,14 +2,13 @@
 using Looplex.DotNet.Services.ScimV2.InMemory.Services;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Looplex.DotNet.Services.ScimV2.InMemory.ExtensionMethods
+namespace Looplex.DotNet.Services.ScimV2.InMemory.ExtensionMethods;
+
+public static class ServicesExtensionMethods
 {
-    public static class ServicesExtensionMethods
+    public static void AddScimV2InMemoryServices(this IServiceCollection services)
     {
-        public static void AddScimV2InMemoryServices(this IServiceCollection services)
-        {
-            services.AddSingleton<IGroupService, GroupService>();
-            services.AddSingleton<IUserService, UserService>();
-        }
+        services.AddSingleton<IGroupService, GroupService>();
+        services.AddSingleton<IUserService, UserService>();
     }
 }
