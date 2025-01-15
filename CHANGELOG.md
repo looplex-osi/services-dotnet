@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="2.3.0"></a>
+## 2.3.0 (2025-01-15)
+
+### Features
+
+* **rbac:** added rbac service implementation
+* **sdk:** upgrade to .net 9
+
+### Bug Fixes
+
+* **dependencies:** upgraded nuget packages and removed redundant packages
+
 <a name="2.2.8"></a>
 ## 2.2.8 (2025-01-14)
 
