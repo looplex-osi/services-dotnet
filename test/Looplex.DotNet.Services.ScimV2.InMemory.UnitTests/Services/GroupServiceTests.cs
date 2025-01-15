@@ -1,11 +1,14 @@
 using System.Dynamic;
 using FluentAssertions;
+using Looplex.DotNet.Core.Application.Abstractions.Services;
 using Looplex.DotNet.Core.Common.Exceptions;
+using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.OpenForExtensions;
 using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Providers;
 using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Services;
 using Looplex.DotNet.Middlewares.ScimV2.Domain;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Groups;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
+using Looplex.DotNet.Middlewares.ScimV2.Services;
 using Looplex.DotNet.Services.ScimV2.InMemory.Services;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
@@ -16,6 +19,8 @@ namespace Looplex.DotNet.Services.ScimV2.InMemory.UnitTests.Services;
 [TestClass]
 public class GroupServiceTests
 {
+    private IRbacService _rbacService = null!;
+    private IExtensionPointOrchestrator _extensionPointOrchestrator = null!;
     private IGroupService _groupService = null!;
     private IConfiguration _configuration = null!;
     private IJsonSchemaProvider _jsonSchemaProvider = null!;
@@ -25,10 +30,12 @@ public class GroupServiceTests
     [TestInitialize]
     public void Setup()
     {
+        _rbacService = Substitute.For<IRbacService>();
+        _extensionPointOrchestrator = new DefaultExtensionPointOrchestrator();
         _configuration = Substitute.For<IConfiguration>();
         _jsonSchemaProvider = Substitute.For<IJsonSchemaProvider>();
         GroupService.Groups = [];
-        _groupService = new GroupService(_configuration, _jsonSchemaProvider);
+        _groupService = new GroupService(_rbacService, _extensionPointOrchestrator, _configuration, _jsonSchemaProvider);
         _context = Substitute.For<IScimV2Context>();
         var state = new ExpandoObject();
         _context.State.Returns(state);
