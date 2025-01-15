@@ -23,6 +23,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Looplex.DotNet.Services.Red
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Looplex.DotNet.Services.SqlDatabases.UnitTests", "test\Looplex.DotNet.Services.SqlDatabases.UnitTests\Looplex.DotNet.Services.SqlDatabases.UnitTests.csproj", "{EDF72BD1-1CE0-4D87-91AC-92A9B95B3D98}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Looplex.DotNet.Services.Rbac", "src\Looplex.DotNet.Services.Rbac\Looplex.DotNet.Services.Rbac.csproj", "{D5C01122-4C01-4631-8D2D-047425C48BC5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Looplex.DotNet.Services.Rbac.UnitTests", "test\Looplex.DotNet.Services.Rbac.UnitTests\Looplex.DotNet.Services.Rbac.UnitTests.csproj", "{40D000DD-B581-47AA-A478-4A16CEC25FAC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +65,14 @@ Global
 		{EDF72BD1-1CE0-4D87-91AC-92A9B95B3D98}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EDF72BD1-1CE0-4D87-91AC-92A9B95B3D98}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EDF72BD1-1CE0-4D87-91AC-92A9B95B3D98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5C01122-4C01-4631-8D2D-047425C48BC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5C01122-4C01-4631-8D2D-047425C48BC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5C01122-4C01-4631-8D2D-047425C48BC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5C01122-4C01-4631-8D2D-047425C48BC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40D000DD-B581-47AA-A478-4A16CEC25FAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40D000DD-B581-47AA-A478-4A16CEC25FAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40D000DD-B581-47AA-A478-4A16CEC25FAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40D000DD-B581-47AA-A478-4A16CEC25FAC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,6 +86,8 @@ Global
 		{CAB80AA9-DD03-482C-8599-A1266128D0D3} = {D3F24E77-7813-4E28-8195-702EADEC1573}
 		{DC98F05E-718E-4482-BBB0-DD194DC1B7CE} = {30A93E4A-33D2-459C-8911-3A3327F08543}
 		{EDF72BD1-1CE0-4D87-91AC-92A9B95B3D98} = {30A93E4A-33D2-459C-8911-3A3327F08543}
+		{D5C01122-4C01-4631-8D2D-047425C48BC5} = {D3F24E77-7813-4E28-8195-702EADEC1573}
+		{40D000DD-B581-47AA-A478-4A16CEC25FAC} = {30A93E4A-33D2-459C-8911-3A3327F08543}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8113699D-9BAD-41E1-A9A8-FA3CF7718C2C}

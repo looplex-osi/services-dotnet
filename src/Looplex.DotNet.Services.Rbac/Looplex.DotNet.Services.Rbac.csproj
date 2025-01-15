@@ -5,20 +5,20 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>true</IsPackable>
-    <PackageId>Looplex.DotNet.Services.Redis</PackageId>
+    <PackageId>Looplex.DotNet.Services.Rbac</PackageId>
     <Authors>Guilherme Câmara</Authors>
     <Company>Looplex</Company>
-    <PackageTags>Looplex;Services;Redis;</PackageTags>
+    <PackageTags>Looplex;Service;Rbac</PackageTags>
     <Description>
-      Contains a implementation to access a Redis database.
+      Contains an implementation for Looplex.DotNet.Core.Application.Abstractions.Services.IRbacService.
     </Description>
   </PropertyGroup>
-  
+
   <ItemGroup>
+    <PackageReference Include="Casbin.NET" Version="2.12.0" />
+    <PackageReference Include="Looplex.DotNet.Core.Application" Version="3.0.5" />
     <PackageReference Include="Looplex.DotNet.Core.Application.Abstractions" Version="3.1.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.0" />
-    <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
+    <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2.Domain" Version="2.4.4" />
   </ItemGroup>
 
 </Project>

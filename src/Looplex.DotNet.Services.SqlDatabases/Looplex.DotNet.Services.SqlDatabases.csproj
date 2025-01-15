@@ -16,7 +16,7 @@
   
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.35" />
-    <PackageReference Include="Looplex.DotNet.Core.Application.Abstractions" Version="3.0.5" />
+    <PackageReference Include="Looplex.DotNet.Core.Application.Abstractions" Version="3.1.1" />
     <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2.Domain" Version="2.4.4" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.0" />
