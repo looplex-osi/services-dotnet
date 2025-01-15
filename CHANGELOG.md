@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="2.3.2"></a>
+## 2.3.2 (2025-01-15)
+
+### Bug Fixes
+
+* **dependencies:** upgrade nuget packages
+* **di:** added missing rbacservice registration
+
 <a name="2.3.1"></a>
 ## 2.3.1 (2025-01-15)
 
