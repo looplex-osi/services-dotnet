@@ -354,20 +354,22 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
             return Task.CompletedTask;
         }
 
-        protected override async Task DeleteHandleInputAsync(IContext context, CancellationToken cancellationToken)
+        protected override Task DeleteHandleInputAsync(IContext context, CancellationToken cancellationToken)
         {
             var id = Guid.Parse((string?)context.AsScimV2Context().RouteValues["ClientCredentialId"]!);
+            context.State.ClientCredentialId = id;
+            return Task.CompletedTask;
+        }
+
+        protected override async Task DeleteValidateInputAsync(IContext context, CancellationToken cancellationToken)
+        {
+            var id = context.GetRequiredValue<Guid>("ClientCredentialId");
             await GetByIdAsync(context, cancellationToken);
             var clientCredential = (ClientCredential)context.Roles["ClientCredential"];
             if (clientCredential == null)
             {
                 throw new EntityNotFoundException(nameof(ClientCredential), id.ToString());
             }
-        }
-
-        protected override Task DeleteValidateInputAsync(IContext context, CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
         }
 
         protected override Task DeleteDefineRolesAsync(IContext context, CancellationToken cancellationToken)
@@ -421,11 +423,6 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
 
         private Task GetByIdAndSecretOrDefaultHandleInputAsync(IContext context, CancellationToken cancellationToken)
         {
-            return Task.CompletedTask;
-        }
-
-        private Task GetByIdAndSecretOrDefaultValidateInputAsync(IContext context, CancellationToken cancellationToken)
-        {
             Guid clientId = Guid.Parse(context.State.ClientId);
             string clientSecret = context.State.ClientSecret; 
             var digest = DigestCredentials(clientId, Convert.FromBase64String(clientSecret));
@@ -434,6 +431,11 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
             context.State.Digest = digest;
             context.State.ClientCredential = clientCredential;
 #pragma warning restore CS8601 // Possible null reference assignment.
+            return Task.CompletedTask;
+        }
+
+        private Task GetByIdAndSecretOrDefaultValidateInputAsync(IContext context, CancellationToken cancellationToken)
+        {
             return Task.CompletedTask;
         }
 
