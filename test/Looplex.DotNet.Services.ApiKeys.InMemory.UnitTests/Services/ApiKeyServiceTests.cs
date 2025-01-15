@@ -1,12 +1,15 @@
 using System.Dynamic;
 using System.Text;
 using FluentAssertions;
+using Looplex.DotNet.Core.Application.Abstractions.Services;
 using Looplex.DotNet.Core.Common.Exceptions;
 using Looplex.DotNet.Middlewares.ApiKeys.Application.Abstractions.Services;
 using Looplex.DotNet.Middlewares.ApiKeys.Domain.Entities.ClientCredentials;
+using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.OpenForExtensions;
 using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Providers;
 using Looplex.DotNet.Middlewares.ScimV2.Domain;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
+using Looplex.DotNet.Middlewares.ScimV2.Services;
 using Looplex.DotNet.Services.ApiKeys.InMemory.Dtos;
 using Looplex.DotNet.Services.ApiKeys.InMemory.Services;
 using Microsoft.AspNetCore.Http;
@@ -19,6 +22,8 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.UnitTests.Services;
 [TestClass]
 public class ApiKeyServiceTests
 {
+    private IRbacService _rbacService = null!;
+    private IExtensionPointOrchestrator _extensionPointOrchestrator = null!;
     private IConfiguration _configuration = null!;
     private IJsonSchemaProvider _jsonSchemaProvider = null!;
     private IApiKeyService _apiKeyService = null!;
@@ -34,9 +39,11 @@ public class ApiKeyServiceTests
         _httpContext = new DefaultHttpContext();
         _memoryStream = new MemoryStream();
         _httpContext.Response.Body = _memoryStream;
+        _rbacService = Substitute.For<IRbacService>();
+        _extensionPointOrchestrator = new DefaultExtensionPointOrchestrator();
         _configuration = Substitute.For<IConfiguration>();
         _jsonSchemaProvider = Substitute.For<IJsonSchemaProvider>();
-        _apiKeyService = new ApiKeyService(_configuration, _jsonSchemaProvider);
+        _apiKeyService = new ApiKeyService(_rbacService, _extensionPointOrchestrator, _configuration, _jsonSchemaProvider);
         _context = Substitute.For<IScimV2Context>();
         dynamic state = new ExpandoObject();
         _context.State.Returns(state);

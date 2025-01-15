@@ -1,18 +1,19 @@
 ﻿using System.Net;
 using System.Security.Cryptography;
+using Looplex.DotNet.Core.Application.Abstractions.Services;
 using Looplex.DotNet.Core.Application.ExtensionMethods;
 using Looplex.DotNet.Core.Common.Exceptions;
 using Looplex.DotNet.Core.Common.Utils;
 using Looplex.DotNet.Middlewares.ApiKeys.Application.Abstractions.Services;
 using Looplex.DotNet.Middlewares.ApiKeys.Domain.Entities.ClientCredentials;
+using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.OpenForExtensions;
 using Looplex.DotNet.Middlewares.ScimV2.Application.Abstractions.Providers;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.ExtensionMethods;
+using Looplex.DotNet.Middlewares.ScimV2.Services;
 using Looplex.DotNet.Services.ApiKeys.InMemory.Dtos;
-using Looplex.OpenForExtension.Abstractions.Commands;
 using Looplex.OpenForExtension.Abstractions.Contexts;
-using Looplex.OpenForExtension.Abstractions.ExtensionMethods;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
@@ -22,151 +23,193 @@ using ScimPatch;
 namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
 {
     public class ApiKeyService(
+        IRbacService rbacService,
+        IExtensionPointOrchestrator extensionPointOrchestrator,
         IConfiguration configuration,
-        IJsonSchemaProvider jsonSchemaProvider) : IApiKeyService
+        IJsonSchemaProvider jsonSchemaProvider)
+        : BaseCrudService(rbacService, extensionPointOrchestrator), IApiKeyService
     {
-        // TODO inherit BaseCrudService 
-        
         private const string JsonSchemaIdForClientCredentialKey = "JsonSchemaIdForClientCredential";
-        
+
         internal static IList<ClientCredential> ClientCredentials = [];
-        
-        public Task GetAllAsync(IContext context, CancellationToken cancellationToken)
+
+        protected override Task GetAllHandleInputAsync(IContext context, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            
-            var startIndex = context.GetRequiredValue<int>("Pagination.StartIndex");
-            var itemsPerPage = context.GetRequiredValue<int>("Pagination.ItemsPerPage");
-            context.Plugins.Execute<IHandleInput>(context, cancellationToken);
-            
-            context.Plugins.Execute<IValidateInput>(context, cancellationToken);
-
-            context.Plugins.Execute<IDefineRoles>(context, cancellationToken);
-
-            context.Plugins.Execute<IBind>(context, cancellationToken);
-
-            context.Plugins.Execute<IBeforeAction>(context, cancellationToken);
-
-            if (!context.SkipDefaultAction)
-            {
-                var records = ClientCredentials
-                    .Skip(Math.Min(0, startIndex - 1))
-                    .Take(itemsPerPage)
-                    .ToList();
-
-                var result = new ListResponse
-                {
-                    Resources = records.Select(r => (object)r).ToList(),
-                    StartIndex = startIndex,
-                    ItemsPerPage = itemsPerPage,
-                    TotalResults = ClientCredentials.Count
-                };
-                context.State.Pagination.TotalCount = ClientCredentials.Count;
-
-                context.Result = JsonConvert.SerializeObject(result, ClientCredential.Converter.Settings);
-            }
-
-            context.Plugins.Execute<IAfterAction>(context, cancellationToken);
-
-            context.Plugins.Execute<IReleaseUnmanagedResources>(context, cancellationToken);
-                        
             return Task.CompletedTask;
         }
 
-        public Task GetByIdAsync(IContext context, CancellationToken cancellationToken)
+        protected override Task GetAllValidateInputAsync(IContext context, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            
-            var id = Guid.Parse((string?)context.AsScimV2Context().RouteValues["ClientCredentialId"]!);
-            context.Plugins.Execute<IHandleInput>(context, cancellationToken);
+            return Task.CompletedTask;
+        }
 
+        protected override Task GetAllDefineRolesAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override Task GetAllBindAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override Task GetAllBeforeActionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override Task GetAllDefaultActionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            var startIndex = context.GetRequiredValue<int>("Pagination.StartIndex");
+            var itemsPerPage = context.GetRequiredValue<int>("Pagination.ItemsPerPage");
+
+            var records = ClientCredentials
+                .Skip(Math.Min(0, startIndex - 1))
+                .Take(itemsPerPage)
+                .ToList();
+
+            var result = new ListResponse
+            {
+                Resources = records.Select(r => (object)r).ToList(),
+                StartIndex = startIndex,
+                ItemsPerPage = itemsPerPage,
+                TotalResults = ClientCredentials.Count
+            };
+            context.State.Pagination.TotalCount = ClientCredentials.Count;
+
+            context.Result = JsonConvert.SerializeObject(result, ClientCredential.Converter.Settings);
+
+            return Task.CompletedTask;
+        }
+
+        protected override Task GetAllAfterActionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override Task GetAllReleaseUnmanagedResourcesAsync(IContext context,
+            CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override Task GetByIdHandleInputAsync(IContext context, CancellationToken cancellationToken)
+        {
+            var id = Guid.Parse((string?)context.AsScimV2Context().RouteValues["ClientCredentialId"]!);
+            context.State.ClientCredentialId = id;
+            return Task.CompletedTask;
+        }
+
+        protected override Task GetByIdValidateInputAsync(IContext context, CancellationToken cancellationToken)
+        {
+            var id = context.GetRequiredValue<Guid>("ClientCredentialId");
             var clientCredential = ClientCredentials.FirstOrDefault(c => c.UniqueId == id);
             if (clientCredential == null)
             {
                 throw new EntityNotFoundException(nameof(ClientCredential), id.ToString());
             }
-            context.Plugins.Execute<IValidateInput>(context, cancellationToken);
-
-            context.Roles.Add("ClientCredential", clientCredential);
-            context.Plugins.Execute<IDefineRoles>(context, cancellationToken);
-
-            context.Plugins.Execute<IBind>(context, cancellationToken);
-
-            context.Plugins.Execute<IBeforeAction>(context, cancellationToken);
-
-            if (!context.SkipDefaultAction)
-            {
-                context.Result = ((ClientCredential)context.Roles["ClientCredential"]).ToJson();
-            }
-
-            context.Plugins.Execute<IAfterAction>(context, cancellationToken);
-
-            context.Plugins.Execute<IReleaseUnmanagedResources>(context, cancellationToken);
-
+            context.State.ClientCredential = clientCredential;
             return Task.CompletedTask;
         }
 
-        public async Task CreateAsync(IContext context, CancellationToken cancellationToken)
+        protected override Task GetByIdDefineRolesAsync(IContext context, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            
+            var clientCredential = context.GetRequiredValue<ClientCredential>("ClientCredential");
+            context.Roles.Add("ClientCredential", clientCredential);
+            return Task.CompletedTask;
+        }
+
+        protected override Task GetByIdBindAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override Task GetByIdBeforeActionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override Task GetByIdDefaultActionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            context.Result = ((ClientCredential)context.Roles["ClientCredential"]).ToJson();
+            return Task.CompletedTask;
+        }
+
+        protected override Task GetByIdAfterActionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override Task GetByIdReleaseUnmanagedResourcesAsync(IContext context,
+            CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override async Task CreateHandleInputAsync(IContext context, CancellationToken cancellationToken)
+        {
             var json = context.GetRequiredValue<string>("Resource");
             var schemaId = configuration[JsonSchemaIdForClientCredentialKey]!;
             var jsonSchema = await jsonSchemaProvider.ResolveJsonSchemaAsync(context, schemaId);
             var clientCredential = Resource.FromJson<ClientCredential>(json, jsonSchema, out var messages);
-            await context.Plugins.ExecuteAsync<IHandleInput>(context, cancellationToken);
+            context.State.ClientCredential = clientCredential;
+            context.State.Messages = messages;
+        }
 
+        protected override Task CreateValidateInputAsync(IContext context, CancellationToken cancellationToken)
+        {
+            var messages = context.GetRequiredValue<IList<string>>("Messages");
             if (messages.Count > 0)
             {
                 throw new EntityInvalidException(messages.ToList());
             }
-            await context.Plugins.ExecuteAsync<IValidateInput>(context, cancellationToken);
 
-            context.Roles.Add("ClientCredential", clientCredential);
-            await context.Plugins.ExecuteAsync<IDefineRoles>(context, cancellationToken);
-
-            await context.Plugins.ExecuteAsync<IBind>(context, cancellationToken);
-
-            await context.Plugins.ExecuteAsync<IBeforeAction>(context, cancellationToken);
-
-            if (!context.SkipDefaultAction)
-            {
-                clientCredential = (ClientCredential)context.Roles["ClientCredential"];
-                
-                var clientId = Guid.NewGuid();
-                
-                var clientSecretByteLength = int.Parse(configuration["ClientSecretByteLength"]!);
-
-                var clientSecretBytes = new byte[clientSecretByteLength];
-                RandomNumberGenerator.Fill(clientSecretBytes);
-
-                clientCredential.ClientId = clientId;
-                clientCredential.Digest = DigestCredentials(clientId, clientSecretBytes)!;
-
-                clientCredential.Id = (ClientCredentials.Max(a => a.Id) ?? 0) + 1; // This should be generated by the DB
-                clientCredential.UniqueId = Guid.NewGuid(); // This should be generated by the DB
-                ClientCredentials.Add(clientCredential); // Persist in storage
-
-                context.Result = context.Roles["ClientCredential"].UniqueId.ToString();
-
-                var httpContext = (HttpContext)context.State.HttpContext;
-                await httpContext.Response.WriteAsJsonAsync(JsonConvert.SerializeObject(new ClientCredentialDto
-                {
-                    ClientId = clientId,
-                    ClientSecret = Convert.ToBase64String(clientSecretBytes)
-                }), HttpStatusCode.Created);
-            }
-
-            await context.Plugins.ExecuteAsync<IAfterAction>(context, cancellationToken);
-
-            await context.Plugins.ExecuteAsync<IReleaseUnmanagedResources>(context, cancellationToken);
+            return Task.CompletedTask;
         }
-        
-        public Task UpdateAsync(IContext context, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
 
-            throw new NotImplementedException();
+        protected override Task CreateDefineRolesAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override Task CreateBindAsync(IContext context, CancellationToken cancellationToken)
+        {
+            var clientCredential = context.GetRequiredValue<ClientCredential>("ClientCredential");
+            context.Roles.Add("ClientCredential", clientCredential);
+            return Task.CompletedTask;
+        }
+
+        protected override Task CreateBeforeActionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override async Task CreateDefaultActionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            var clientCredential = (ClientCredential)context.Roles["ClientCredential"];
+
+            var clientId = Guid.NewGuid();
+
+            var clientSecretByteLength = int.Parse(configuration["ClientSecretByteLength"]!);
+
+            var clientSecretBytes = new byte[clientSecretByteLength];
+            RandomNumberGenerator.Fill(clientSecretBytes);
+
+            clientCredential.ClientId = clientId;
+            clientCredential.Digest = DigestCredentials(clientId, clientSecretBytes)!;
+
+            clientCredential.Id = (ClientCredentials.Max(a => a.Id) ?? 0) + 1; // This should be generated by the DB
+            clientCredential.UniqueId = Guid.NewGuid(); // This should be generated by the DB
+            ClientCredentials.Add(clientCredential); // Persist in storage
+
+            context.Result = context.Roles["ClientCredential"].UniqueId.ToString();
+
+            var httpContext = (HttpContext)context.State.HttpContext;
+            await httpContext.Response.WriteAsJsonAsync(JsonConvert.SerializeObject(new ClientCredentialDto
+            {
+                ClientId = clientId,
+                ClientSecret = Convert.ToBase64String(clientSecretBytes)
+            }), HttpStatusCode.Created);
         }
 
         private string? DigestCredentials(Guid clientId, byte[] clientSecretBytes)
@@ -189,19 +232,73 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
 
             return digest;
         }
-        
-        public async Task PatchAsync(IContext context, CancellationToken cancellationToken)
+
+        protected override Task CreateAfterActionAsync(IContext context, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            
+            return Task.CompletedTask;
+        }
+
+        protected override Task CreateReleaseUnmanagedResourcesAsync(IContext context,
+            CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override Task UpdateHandleInputAsync(IContext context, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Task UpdateValidateInputAsync(IContext context, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Task UpdateDefineRolesAsync(IContext context, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Task UpdateBindAsync(IContext context, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Task UpdateBeforeActionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Task UpdateDefaultActionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Task UpdateAfterActionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override Task UpdateReleaseUnmanagedResourcesAsync(IContext context,
+            CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override async Task PatchHandleInputAsync(IContext context, CancellationToken cancellationToken)
+        {
             var json = context.GetRequiredValue<string>("Operations");
             await GetByIdAsync(context, cancellationToken);
             var clientCredential = ((ClientCredential)context.Roles["ClientCredential"])
                 .WithObservableProxy();
             context.Roles["ClientCredential"] = clientCredential;
             var operations = OperationTracker.FromJson(clientCredential, json);
-            await context.Plugins.ExecuteAsync<IHandleInput>(context, cancellationToken);
+            context.State.Operations = operations;
+        }
 
+        protected override Task PatchValidateInputAsync(IContext context, CancellationToken cancellationToken)
+        {
+            var operations = context.GetRequiredValue<IList<OperationNode>>("Operations");
             if (operations.Count == 0)
             {
                 throw new InvalidOperationException("List of operations can't be empty.");
@@ -215,96 +312,171 @@ namespace Looplex.DotNet.Services.ApiKeys.InMemory.Services
             if (readonlyProperty != null)
                 throw new InvalidOperationException($"Cannot update {readonlyProperty}");
 
-            await context.Plugins.ExecuteAsync<IValidateInput>(context, cancellationToken);
-
-            context.Roles["Operations"] = operations;
-            await context.Plugins.ExecuteAsync<IDefineRoles>(context, cancellationToken);
-
-            await context.Plugins.ExecuteAsync<IBind>(context, cancellationToken);
-
-            await context.Plugins.ExecuteAsync<IBeforeAction>(context, cancellationToken);
-
-            if (!context.SkipDefaultAction)
-            {
-                foreach (var operationNode in context.Roles["Operations"])
-                {
-                    if (!await operationNode.TryApplyAsync())
-                    {
-                        throw operationNode.OperationException;
-                    }
-                }
-            }
-
-            await context.Plugins.ExecuteAsync<IAfterAction>(context, cancellationToken);
-
-            await context.Plugins.ExecuteAsync<IReleaseUnmanagedResources>(context, cancellationToken);
+            return Task.CompletedTask;
         }
 
-        public async Task DeleteAsync(IContext context, CancellationToken cancellationToken)
+        protected override Task PatchDefineRolesAsync(IContext context, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            
-            var id = Guid.Parse((string?)context.AsScimV2Context().RouteValues["ClientCredentialId"]!);
-            await context.Plugins.ExecuteAsync<IHandleInput>(context, cancellationToken);
+            var operations = context.GetRequiredValue<IList<OperationNode>>("Operations");
+            context.Roles["Operations"] = operations;
+            return Task.CompletedTask;
+        }
 
+        protected override Task PatchBindAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override Task PatchBeforeActionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override async Task PatchDefaultActionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            foreach (var operationNode in context.Roles["Operations"])
+            {
+                if (!await operationNode.TryApplyAsync())
+                {
+                    throw operationNode.OperationException;
+                }
+            }
+        }
+
+        protected override Task PatchAfterActionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override Task PatchReleaseUnmanagedResourcesAsync(IContext context,
+            CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override async Task DeleteHandleInputAsync(IContext context, CancellationToken cancellationToken)
+        {
+            var id = Guid.Parse((string?)context.AsScimV2Context().RouteValues["ClientCredentialId"]!);
             await GetByIdAsync(context, cancellationToken);
             var clientCredential = (ClientCredential)context.Roles["ClientCredential"];
             if (clientCredential == null)
             {
                 throw new EntityNotFoundException(nameof(ClientCredential), id.ToString());
             }
-            await context.Plugins.ExecuteAsync<IValidateInput>(context, cancellationToken);
-            
-            await context.Plugins.ExecuteAsync<IDefineRoles>(context, cancellationToken);
+        }
 
-            await context.Plugins.ExecuteAsync<IBind>(context, cancellationToken);
+        protected override Task DeleteValidateInputAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
 
-            await context.Plugins.ExecuteAsync<IBeforeAction>(context, cancellationToken);
+        protected override Task DeleteDefineRolesAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
 
-            if (!context.SkipDefaultAction)
-            {
-                ClientCredentials.Remove(context.Roles["ClientCredential"]);
-            }
+        protected override Task DeleteBindAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
 
-            await context.Plugins.ExecuteAsync<IAfterAction>(context, cancellationToken);
+        protected override Task DeleteBeforeActionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
 
-            await context.Plugins.ExecuteAsync<IReleaseUnmanagedResources>(context, cancellationToken);
+        protected override Task DeleteDefaultActionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            ClientCredentials.Remove(context.Roles["ClientCredential"]);
+            return Task.CompletedTask;
+        }
+
+        protected override Task DeleteAfterActionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected override Task DeleteReleaseUnmanagedResourcesAsync(IContext context,
+            CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
         }
 
         public Task GetByIdAndSecretOrDefaultAsync(IContext context, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            
-            Guid clientId = Guid.Parse(context.State.ClientId);
-            string clientSecret = context.State.ClientSecret;
-            context.Plugins.Execute<IHandleInput>(context, cancellationToken);
+            rbacService.ThrowIfUnauthorized(context, GetType().Name, this.GetCallerName(), cancellationToken);
+        
+            return extensionPointOrchestrator.OrchestrateAsync(
+                context,
+                GetByIdAndSecretOrDefaultHandleInputAsync,
+                GetByIdAndSecretOrDefaultValidateInputAsync,
+                GetByIdAndSecretOrDefaultDefineRolesAsync,
+                GetByIdAndSecretOrDefaultBindAsync,
+                GetByIdAndSecretOrDefaultBeforeActionAsync,
+                GetByIdAndSecretOrDefaultDefaultActionAsync,
+                GetByIdAndSecretOrDefaultAfterActionAsync,
+                GetByIdAndSecretOrDefaultReleaseUnmanagedResourcesAsync,
+                cancellationToken);
+        }
 
+        private Task GetByIdAndSecretOrDefaultHandleInputAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        private Task GetByIdAndSecretOrDefaultValidateInputAsync(IContext context, CancellationToken cancellationToken)
+        {
+            Guid clientId = Guid.Parse(context.State.ClientId);
+            string clientSecret = context.State.ClientSecret; 
             var digest = DigestCredentials(clientId, Convert.FromBase64String(clientSecret));
             var clientCredential = ClientCredentials.FirstOrDefault(c => c.Digest == digest);
+#pragma warning disable CS8601 // Possible null reference assignment.
+            context.State.Digest = digest;
+            context.State.ClientCredential = clientCredential;
+#pragma warning restore CS8601 // Possible null reference assignment.
+            return Task.CompletedTask;
+        }
+
+        private Task GetByIdAndSecretOrDefaultDefineRolesAsync(IContext context, CancellationToken cancellationToken)
+        {
+            var digest = context.GetValue<string>("Digest");
+            var clientCredential = context.GetValue<ClientCredential>("ClientCredential");
             if (clientCredential != null && digest != null)
             {
                 context.Roles.Add("ClientCredential", clientCredential);
             }
-            context.Plugins.Execute<IValidateInput>(context, cancellationToken);
-            
-            context.Plugins.Execute<IDefineRoles>(context, cancellationToken);
 
-            context.Plugins.Execute<IBind>(context, cancellationToken);
+            return Task.CompletedTask;
+        }
 
-            context.Plugins.Execute<IBeforeAction>(context, cancellationToken);
+        private Task GetByIdAndSecretOrDefaultBindAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
 
-            if (!context.SkipDefaultAction)
+        private Task GetByIdAndSecretOrDefaultBeforeActionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        private Task GetByIdAndSecretOrDefaultDefaultActionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            if (context.Roles.TryGetValue("ClientCredential", out var role))
             {
-                if (context.Roles.TryGetValue("ClientCredential", out var role))
-                {
-                    context.Result = ((ClientCredential)role).ToJson();
-                }
+                context.Result = ((ClientCredential)role).ToJson();
             }
 
-            context.Plugins.Execute<IAfterAction>(context, cancellationToken);
+            return Task.CompletedTask;
+        }
 
-            context.Plugins.Execute<IReleaseUnmanagedResources>(context, cancellationToken);
-            
+        private Task GetByIdAndSecretOrDefaultAfterActionAsync(IContext context, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        private Task GetByIdAndSecretOrDefaultReleaseUnmanagedResourcesAsync(IContext context,
+            CancellationToken cancellationToken)
+        {
             return Task.CompletedTask;
         }
     }
