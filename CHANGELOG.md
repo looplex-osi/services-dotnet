@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="2.3.1"></a>
+## 2.3.1 (2025-01-15)
+
+### Bug Fixes
+
+* **rbac:** add missing extension method to configure rbac on dep container
+
 <a name="2.3.0"></a>
 ## 2.3.0 (2025-01-15)
 
