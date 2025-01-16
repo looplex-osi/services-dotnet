@@ -4,10 +4,14 @@ using Looplex.DotNet.Core.Application.Abstractions.Services;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Looplex.DotNet.Services.SqlDatabases;
 
 public class SqlDatabasesProvider(
+    IHostEnvironment hostEnvironment,
+    ILogger<SqlDatabasesProvider> logger,
     IConfiguration configuration,
     ISecretsService secretsService) : ISqlDatabaseProvider
 {
@@ -29,7 +33,7 @@ public class SqlDatabasesProvider(
         }
         set => _routingDatabaseService = value;
     }
-    
+
     public async Task<ISqlDatabaseService> GetDatabaseAsync(string domain)
     {
         var query = @"
@@ -48,12 +52,34 @@ public class SqlDatabasesProvider(
         var customerConnStringKeyVaultId = await RoutingDatabaseService
             .QueryFirstOrDefaultAsync<string>(query, new { Domain = domain, Status = (int)CustomerStatus.Active });
 
+        try
+        {
+            var builder = new SqlConnectionStringBuilder(customerConnStringKeyVaultId);
+
+            if (!hostEnvironment.IsDevelopment())
+                builder.Password = "****";
+
+            logger.LogInformation(
+                "Database: Getting connection string for tenant {Tenant}. Result: {ConnectionString}",
+                domain, customerConnStringKeyVaultId);
+        }
+        catch (Exception e)
+        {
+            logger.LogError("Unable to connect to database for tenant {Tenant}. Exception: {Exception}", domain, e);
+            throw new Error($"Unable to connect to database for tenant {domain}",
+                (int)HttpStatusCode.InternalServerError, e);
+        }
+
         if (string.IsNullOrEmpty(customerConnStringKeyVaultId))
-            throw new Error($"Unable to connect to database for domain {domain}", (int)HttpStatusCode.InternalServerError);
+        {
+            logger.LogError("Unable to connect to database for tenant {Tenant}. Connection string is null or empty", domain);
+            throw new Error($"Unable to connect to database for domain {domain}",
+                (int)HttpStatusCode.InternalServerError);
+        }
 
         var customerConnString = await secretsService
             .GetSecretAsync(customerConnStringKeyVaultId);
-        
+
         var connection = new SqlConnection(customerConnString);
         return new SqlDatabaseService(connection);
     }
