@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="2.3.5"></a>
+## 2.3.5 (2025-01-16)
+
+### Bug Fixes
+
+* **redis:** fix health check for redis service
+* **sqlservice:** added routing database health check
+
 <a name="2.3.4"></a>
 ## 2.3.4 (2025-01-16)
 
