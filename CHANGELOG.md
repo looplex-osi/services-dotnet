@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="2.3.7"></a>
+## 2.3.7 (2025-01-16)
+
+### Bug Fixes
+
+* **dependencies:** update middleware and core packages
+
 <a name="2.3.6"></a>
 ## 2.3.6 (2025-01-16)
 
