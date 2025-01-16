@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="2.3.4"></a>
+## 2.3.4 (2025-01-16)
+
+### Bug Fixes
+
+* **services:** fixed wrong route value key in services
+
 <a name="2.3.3"></a>
 ## 2.3.3 (2025-01-15)
 
