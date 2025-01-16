@@ -89,7 +89,7 @@ public class UserService(
 
     protected override Task GetByIdHandleInputAsync(IContext context, CancellationToken cancellationToken)
     {
-        var id = Guid.Parse((string?)context.AsScimV2Context().RouteValues["UserId"]!);
+        var id = Guid.Parse(context.GetRequiredRouteValue<string>("userId"));
         context.State.UserId = id;
         return Task.CompletedTask;
     }
@@ -298,7 +298,7 @@ public class UserService(
 
     protected override Task DeleteHandleInputAsync(IContext context, CancellationToken cancellationToken)
     {
-        var id = Guid.Parse((string?)context.AsScimV2Context().RouteValues["UserId"]!);
+        var id = Guid.Parse(context.GetRequiredRouteValue<string>("userId"));
         context.State.UserId = id;
         return Task.CompletedTask;
     }

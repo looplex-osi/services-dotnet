@@ -32,6 +32,8 @@ public class ApiKeyService(
     private const string JsonSchemaIdForClientCredentialKey = "JsonSchemaIdForClientCredential";
 
     internal static IList<ClientCredential> ClientCredentials = [];
+    private readonly IExtensionPointOrchestrator _extensionPointOrchestrator = extensionPointOrchestrator;
+    private readonly IRbacService _rbacService = rbacService;
 
     protected override Task GetAllHandleInputAsync(IContext context, CancellationToken cancellationToken)
     {
@@ -95,7 +97,7 @@ public class ApiKeyService(
 
     protected override Task GetByIdHandleInputAsync(IContext context, CancellationToken cancellationToken)
     {
-        var id = Guid.Parse((string?)context.AsScimV2Context().RouteValues["ClientCredentialId"]!);
+        var id = Guid.Parse(context.GetRequiredRouteValue<string>("clientCredentialId"));
         context.State.ClientCredentialId = id;
         return Task.CompletedTask;
     }
@@ -356,7 +358,7 @@ public class ApiKeyService(
 
     protected override Task DeleteHandleInputAsync(IContext context, CancellationToken cancellationToken)
     {
-        var id = Guid.Parse((string?)context.AsScimV2Context().RouteValues["ClientCredentialId"]!);
+        var id = Guid.Parse(context.GetRequiredRouteValue<string>("clientCredentialId"));
         context.State.ClientCredentialId = id;
         return Task.CompletedTask;
     }
@@ -406,9 +408,9 @@ public class ApiKeyService(
 
     public Task GetByIdAndSecretOrDefaultAsync(IContext context, CancellationToken cancellationToken)
     {
-        rbacService.ThrowIfUnauthorized(context, GetType().Name, this.GetCallerName(), cancellationToken);
+        _rbacService.ThrowIfUnauthorized(context, GetType().Name, this.GetCallerName(), cancellationToken);
         
-        return extensionPointOrchestrator.OrchestrateAsync(
+        return _extensionPointOrchestrator.OrchestrateAsync(
             context,
             GetByIdAndSecretOrDefaultHandleInputAsync,
             GetByIdAndSecretOrDefaultValidateInputAsync,

@@ -89,7 +89,7 @@ public class GroupService(
 
     protected override Task GetByIdHandleInputAsync(IContext context, CancellationToken cancellationToken)
     {
-        var id = Guid.Parse((string?)context.AsScimV2Context().RouteValues["GroupId"]!);
+        var id = Guid.Parse(context.GetRequiredRouteValue<string>("groupId"));
         context.State.GroupId = id;
         return Task.CompletedTask;
     }
@@ -298,7 +298,7 @@ public class GroupService(
 
     protected override Task DeleteHandleInputAsync(IContext context, CancellationToken cancellationToken)
     {
-        var id = Guid.Parse((string?)context.AsScimV2Context().RouteValues["GroupId"]!);
+        var id = Guid.Parse(context.GetRequiredRouteValue<string>("groupId"));
         context.State.GroupId = id;
         return Task.CompletedTask;
     }
