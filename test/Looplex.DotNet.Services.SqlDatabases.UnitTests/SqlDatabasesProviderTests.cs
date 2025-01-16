@@ -58,8 +58,8 @@ public class SqlDatabasesProviderTests
         // Arrange
         var domain = "example.com";
         var customerConnStringKeyVaultId = "keyvault-id";
-        var customerConnString = "Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;";
-
+        string customerConnString = "Server=localhost;Database=myDataBase;User Id=myUsername;Password=myPassword;";
+        
         _sqlDatabasesProvider.RoutingDatabaseService = _routingDatabaseService;
         
         _routingDatabaseService

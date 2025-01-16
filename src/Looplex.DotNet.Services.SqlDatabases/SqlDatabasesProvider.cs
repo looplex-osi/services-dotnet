@@ -52,9 +52,19 @@ public class SqlDatabasesProvider(
         var customerConnStringKeyVaultId = await RoutingDatabaseService
             .QueryFirstOrDefaultAsync<string>(query, new { Domain = domain, Status = (int)CustomerStatus.Active });
 
+        if (string.IsNullOrEmpty(customerConnStringKeyVaultId))
+        {
+            logger.LogError("Unable to connect to database for tenant {Tenant}. Key vault id is null or empty", domain);
+            throw new Error($"Unable to connect to database for domain {domain}",
+                (int)HttpStatusCode.InternalServerError);
+        }
+
+        var customerConnString = await secretsService
+            .GetSecretAsync(customerConnStringKeyVaultId);
+        
         try
         {
-            var builder = new SqlConnectionStringBuilder(customerConnStringKeyVaultId);
+            var builder = new SqlConnectionStringBuilder(customerConnString);
 
             if (!hostEnvironment.IsDevelopment())
                 builder.Password = "****";
@@ -69,17 +79,7 @@ public class SqlDatabasesProvider(
             throw new Error($"Unable to connect to database for tenant {domain}",
                 (int)HttpStatusCode.InternalServerError, e);
         }
-
-        if (string.IsNullOrEmpty(customerConnStringKeyVaultId))
-        {
-            logger.LogError("Unable to connect to database for tenant {Tenant}. Connection string is null or empty", domain);
-            throw new Error($"Unable to connect to database for domain {domain}",
-                (int)HttpStatusCode.InternalServerError);
-        }
-
-        var customerConnString = await secretsService
-            .GetSecretAsync(customerConnStringKeyVaultId);
-
+        
         var connection = new SqlConnection(customerConnString);
         return new SqlDatabaseService(connection);
     }
