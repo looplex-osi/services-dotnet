@@ -3,7 +3,7 @@ using StackExchange.Redis;
 
 namespace Looplex.DotNet.Services.Redis;
 
-public class RedisHealthCheck(ConnectionMultiplexer redisConnection) : IHealthCheck
+public class RedisHealthCheck(IConnectionMultiplexer redisConnection) : IHealthCheck
 {
     public async Task<HealthCheckResult> CheckHealthAsync(
         HealthCheckContext context,
