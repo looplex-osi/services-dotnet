@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="2.3.9"></a>
+## 2.3.9 (2025-01-16)
+
+### Bug Fixes
+
+* **healthcheck:** routing database was not disposing connection
+* **logs:** fix connection string in logger message in database provider
+
 <a name="2.3.8"></a>
 ## 2.3.8 (2025-01-16)
 
