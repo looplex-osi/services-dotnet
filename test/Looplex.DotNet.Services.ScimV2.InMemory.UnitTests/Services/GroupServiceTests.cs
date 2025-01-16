@@ -74,7 +74,7 @@ public class GroupServiceTests
         // Arrange
         _context.RouteValues = new Dictionary<string, object?>
         {
-            { "GroupId", Guid.NewGuid().ToString() }
+            { "groupId", Guid.NewGuid().ToString() }
         };
         
         // Act & Assert
@@ -93,7 +93,7 @@ public class GroupServiceTests
         };
         _context.RouteValues = new Dictionary<string, object?>
         {
-            { "GroupId", existingGroup.UniqueId.ToString() }
+            { "groupId", existingGroup.UniqueId.ToString() }
         };
         GroupService.Groups.Add(existingGroup);
 
@@ -137,7 +137,7 @@ public class GroupServiceTests
         };
         _context.RouteValues = new Dictionary<string, object?>
         {
-            { "GroupId", existingGroup.UniqueId.ToString() }
+            { "groupId", existingGroup.UniqueId.ToString() }
         };
         GroupService.Groups.Add(existingGroup);
         _context.State.Operations = "[ { \"op\": \"add\", \"path\": \"DisplayName\", \"value\": \"Updated Group\" } ]";
@@ -158,7 +158,7 @@ public class GroupServiceTests
         // Arrange
         _context.RouteValues = new Dictionary<string, object?>
         {
-            { "GroupId", Guid.NewGuid().ToString() }
+            { "groupId", Guid.NewGuid().ToString() }
         };
         // Act & Assert
         await Assert.ThrowsExceptionAsync<EntityNotFoundException>(() => _groupService.DeleteAsync(_context, _cancellationToken));
@@ -177,7 +177,7 @@ public class GroupServiceTests
         _context.State.Id = existingGroup.UniqueId.ToString()!;
         _context.RouteValues = new Dictionary<string, object?>
         {
-            { "GroupId", existingGroup.UniqueId.ToString() }
+            { "groupId", existingGroup.UniqueId.ToString() }
         };
         GroupService.Groups.Add(existingGroup);
 

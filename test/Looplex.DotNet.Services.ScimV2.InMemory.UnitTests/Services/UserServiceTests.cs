@@ -74,7 +74,7 @@ public class UserServiceTests
         // Arrange
         _context.RouteValues = new Dictionary<string, object?>
         {
-            { "UserId", Guid.NewGuid().ToString() }
+            { "userId", Guid.NewGuid().ToString() }
         };
         
         // Act & Assert
@@ -93,7 +93,7 @@ public class UserServiceTests
         };
         _context.RouteValues = new Dictionary<string, object?>
         {
-            { "UserId", existingUser.UniqueId.ToString() }
+            { "userId", existingUser.UniqueId.ToString() }
         };
         UserService.Users.Add(existingUser);
 
@@ -139,7 +139,7 @@ public class UserServiceTests
         _context.State.Operations = "[ { \"op\": \"add\", \"path\": \"InvalidPath\", \"value\": \"Updated User\" } ]";
         _context.RouteValues = new Dictionary<string, object?>
         {
-            { "UserId", existingUser.UniqueId.ToString() }
+            { "userId", existingUser.UniqueId.ToString() }
         };
         
         // Act
@@ -164,7 +164,7 @@ public class UserServiceTests
         _context.State.Operations = "[ { \"op\": \"add\", \"path\": \"UserName\", \"value\": \"Updated User\" } ]";
         _context.RouteValues = new Dictionary<string, object?>
         {
-            { "UserId", existingUser.UniqueId.ToString() }
+            { "userId", existingUser.UniqueId.ToString() }
         };
         
         // Act
@@ -182,7 +182,7 @@ public class UserServiceTests
         // Arrange
         _context.RouteValues = new Dictionary<string, object?>
         {
-            { "UserId", Guid.NewGuid().ToString() }
+            { "userId", Guid.NewGuid().ToString() }
         };
         
         // Act & Assert
@@ -201,7 +201,7 @@ public class UserServiceTests
         };
         _context.RouteValues = new Dictionary<string, object?>
         {
-            { "UserId", existingUser.UniqueId.ToString() }
+            { "userId", existingUser.UniqueId.ToString() }
         };
         UserService.Users.Add(existingUser);
 

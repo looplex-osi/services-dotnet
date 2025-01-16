@@ -88,7 +88,7 @@ public class ApiKeyServiceTests
         // Arrange
         _context.RouteValues = new Dictionary<string, object?>
         {
-            { "ClientCredentialId", Guid.NewGuid().ToString() }
+            { "clientCredentialId", Guid.NewGuid().ToString() }
         };
         
         // Act & Assert
@@ -107,7 +107,7 @@ public class ApiKeyServiceTests
         };
         _context.RouteValues = new Dictionary<string, object?>
         {
-            { "ClientCredentialId", existingClientCredential.UniqueId.ToString() }
+            { "clientCredentialId", existingClientCredential.UniqueId.ToString() }
         };
         ApiKeyService.ClientCredentials.Add(existingClientCredential);
 
@@ -160,7 +160,7 @@ public class ApiKeyServiceTests
         _context.State.Operations = $"[ {{ \"op\": \"add\", \"path\": \"ExpirationTime\", \"value\": \"{expirationTime:yyyy-MM-ddTHH:mm:ss.ffffffZ}\" }} ]";
         _context.RouteValues = new Dictionary<string, object?>
         {
-            { "ClientCredentialId", existingClientCredential.UniqueId.ToString() }
+            { "clientCredentialId", existingClientCredential.UniqueId.ToString() }
         };
         
         // Act
@@ -188,7 +188,7 @@ public class ApiKeyServiceTests
         _context.State.Operations = $"[ {{ \"op\": \"add\", \"path\": \"{property}\", \"value\": \"{value}\" }} ]";
         _context.RouteValues = new Dictionary<string, object?>
         {
-            { "ClientCredentialId", existingClientCredential.UniqueId.ToString() }
+            { "clientCredentialId", existingClientCredential.UniqueId.ToString() }
         };
         
         // Act & Assert
@@ -203,7 +203,7 @@ public class ApiKeyServiceTests
         // Arrange
         _context.RouteValues = new Dictionary<string, object?>
         {
-            { "ClientCredentialId", Guid.NewGuid().ToString() }
+            { "clientCredentialId", Guid.NewGuid().ToString() }
         };
         
         // Act & Assert
@@ -222,7 +222,7 @@ public class ApiKeyServiceTests
         };
         _context.RouteValues = new Dictionary<string, object?>
         {
-            { "ClientCredentialId", existingClientCredential.UniqueId.ToString() }
+            { "clientCredentialId", existingClientCredential.UniqueId.ToString() }
         };
         ApiKeyService.ClientCredentials.Add(existingClientCredential);
 
