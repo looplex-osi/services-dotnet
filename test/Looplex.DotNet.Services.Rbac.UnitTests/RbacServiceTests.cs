@@ -41,6 +41,7 @@ public class RbacServiceTests
 
         dynamic state = new ExpandoObject();
         _context.State.Returns(state);
+        _context.State.CancellationToken = CancellationToken.None;
     }
         
     [TestMethod]
@@ -49,7 +50,7 @@ public class RbacServiceTests
         // Arrange
         
         // Act
-        var action = () => _rbacService.ThrowIfUnauthorized(_context, "resource", "read", CancellationToken.None);
+        var action = () => _rbacService.ThrowIfUnauthorized(_context, "resource", "read");
         
         // Assert
         action.Should().Throw<ArgumentNullException>().WithMessage("The path 'User.Email' does not exist or has a null value. (Parameter 'path')");
@@ -64,7 +65,7 @@ public class RbacServiceTests
         _context.State.User.Email = "";
         
         // Act
-        var action = () => _rbacService.ThrowIfUnauthorized(_context, "resource", "read", CancellationToken.None);
+        var action = () => _rbacService.ThrowIfUnauthorized(_context, "resource", "read");
         
         // Assert
         action.Should().Throw<Error>().WithMessage("User email is required for authorization");
@@ -76,7 +77,7 @@ public class RbacServiceTests
         // Arrange
         
         // Act
-        var action = () => _rbacService.ThrowIfUnauthorized(_context, "resource", "read", CancellationToken.None);
+        var action = () => _rbacService.ThrowIfUnauthorized(_context, "resource", "read");
         
         // Assert
         action.Should().Throw<ArgumentNullException>().WithMessage("The path 'User.Email' does not exist or has a null value. (Parameter 'path')");
@@ -91,7 +92,7 @@ public class RbacServiceTests
         _context.State.User.Email = "email@email.com";
         
         // Act
-        var action = () => _rbacService.ThrowIfUnauthorized(_context, "resource", "read", CancellationToken.None);
+        var action = () => _rbacService.ThrowIfUnauthorized(_context, "resource", "read");
         
         // Assert
         action.Should().Throw<Error>().WithMessage("Tenant is required for authorization");
@@ -109,7 +110,7 @@ public class RbacServiceTests
         _context.State.User.Email = "bob.rivest@email.com";
         
         // Act & Assert
-        _rbacService.ThrowIfUnauthorized(_context, "resource", action, CancellationToken.None);
+        _rbacService.ThrowIfUnauthorized(_context, "resource", action);
     }
     
     [TestMethod]
@@ -122,7 +123,7 @@ public class RbacServiceTests
         _context.State.User.Email = "bob.rivest@email.com";
         
         // Act
-        var act = () => _rbacService.ThrowIfUnauthorized(_context, "resource", action, CancellationToken.None);
+        var act = () => _rbacService.ThrowIfUnauthorized(_context, "resource", action);
         
         // Assert
         act.Should().Throw<Error>().WithMessage("No authorization to access this resource");

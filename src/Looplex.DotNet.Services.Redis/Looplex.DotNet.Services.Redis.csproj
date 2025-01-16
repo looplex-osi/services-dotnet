@@ -15,7 +15,7 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Looplex.DotNet.Core.Application.Abstractions" Version="3.2.3" />
+    <PackageReference Include="Looplex.DotNet.Core.Application.Abstractions" Version="4.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.1" />
     <PackageReference Include="StackExchange.Redis" Version="2.8.24" />

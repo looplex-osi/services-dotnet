@@ -51,6 +51,7 @@ public class ApiKeyServiceTests
         var roles = new Dictionary<string, dynamic>();
         _context.Roles.Returns(roles);
         _cancellationToken = new CancellationToken();
+        _context.State.CancellationToken = _cancellationToken;
     }
 
     [TestMethod]
@@ -71,7 +72,7 @@ public class ApiKeyServiceTests
         ApiKeyService.ClientCredentials.Add(existingClientCredential);
             
         // Act
-        await _apiKeyService.GetAllAsync(_context, _cancellationToken);
+        await _apiKeyService.GetAllAsync(_context);
 
         // Assert
         var result = JsonConvert.DeserializeObject<ListResponse>((string)_context.Result!)!;
@@ -92,7 +93,7 @@ public class ApiKeyServiceTests
         };
         
         // Act & Assert
-        await Assert.ThrowsExceptionAsync<EntityNotFoundException>(() => _apiKeyService.GetByIdAsync(_context, _cancellationToken));
+        await Assert.ThrowsExceptionAsync<EntityNotFoundException>(() => _apiKeyService.GetByIdAsync(_context));
     }
 
     [TestMethod]
@@ -112,7 +113,7 @@ public class ApiKeyServiceTests
         ApiKeyService.ClientCredentials.Add(existingClientCredential);
 
         // Act
-        await _apiKeyService.GetByIdAsync(_context, _cancellationToken);
+        await _apiKeyService.GetByIdAsync(_context);
             
         // Assert
         JsonConvert.DeserializeObject<ClientCredential>(_context.Result!.ToString()!).Should().BeEquivalentTo(existingClientCredential);
@@ -133,7 +134,7 @@ public class ApiKeyServiceTests
             .Returns("{}");
         
         // Act
-        await _apiKeyService.CreateAsync(_context, _cancellationToken);
+        await _apiKeyService.CreateAsync(_context);
 
         // Assert
         var id = Guid.Parse((string)_context.Result!);
@@ -164,7 +165,7 @@ public class ApiKeyServiceTests
         };
         
         // Act
-        await _apiKeyService.PatchAsync(_context, _cancellationToken);
+        await _apiKeyService.PatchAsync(_context);
 
         // Assert
         var clientCredential = ApiKeyService.ClientCredentials.First(u => u.UniqueId == existingClientCredential.UniqueId);
@@ -193,7 +194,7 @@ public class ApiKeyServiceTests
         
         // Act & Assert
         var ex = await Assert
-            .ThrowsExceptionAsync<InvalidOperationException>(() => _apiKeyService.PatchAsync(_context, _cancellationToken));
+            .ThrowsExceptionAsync<InvalidOperationException>(() => _apiKeyService.PatchAsync(_context));
         ex.Message.Should().Be($"Cannot update {property}");
     }
     
@@ -207,7 +208,7 @@ public class ApiKeyServiceTests
         };
         
         // Act & Assert
-        await Assert.ThrowsExceptionAsync<EntityNotFoundException>(() => _apiKeyService.DeleteAsync(_context, _cancellationToken));
+        await Assert.ThrowsExceptionAsync<EntityNotFoundException>(() => _apiKeyService.DeleteAsync(_context));
     }
     
     [TestMethod]
@@ -227,7 +228,7 @@ public class ApiKeyServiceTests
         ApiKeyService.ClientCredentials.Add(existingClientCredential);
 
         // Act
-        await _apiKeyService.DeleteAsync(_context, _cancellationToken);
+        await _apiKeyService.DeleteAsync(_context);
 
         // Assert
         ApiKeyService.ClientCredentials.Should().NotContain(u => u.Id == existingClientCredential.Id);
@@ -241,7 +242,7 @@ public class ApiKeyServiceTests
         _context.State.ClientSecret = Convert.ToBase64String([1,0,1]);
 
         // Act
-        await _apiKeyService.GetByIdAndSecretOrDefaultAsync(_context, _cancellationToken);
+        await _apiKeyService.GetByIdAndSecretOrDefaultAsync(_context);
             
         // Assert
         _context.Roles.Should().NotContainKey("ClientCredential");
@@ -263,7 +264,7 @@ public class ApiKeyServiceTests
         _jsonSchemaProvider
             .ResolveJsonSchemaAsync(Arg.Any<IScimV2Context>(), "clientCredentialSchemaId")
             .Returns("{}");
-        await _apiKeyService.CreateAsync(_context, _cancellationToken);
+        await _apiKeyService.CreateAsync(_context);
         _memoryStream.Seek(0, SeekOrigin.Begin);
         var responseBody = await new StreamReader(_memoryStream, Encoding.UTF8).ReadToEndAsync(CancellationToken.None);
         var clientCredentialDto = JsonConvert.DeserializeObject<ClientCredentialDto>(responseBody)!;
@@ -272,7 +273,7 @@ public class ApiKeyServiceTests
         _context.State.ClientSecret = clientCredentialDto.ClientSecret;
 
         // Act
-        await _apiKeyService.GetByIdAndSecretOrDefaultAsync(_context, _cancellationToken);
+        await _apiKeyService.GetByIdAndSecretOrDefaultAsync(_context);
 
         // Assert
         Assert.IsNotNull(_context.Result);

@@ -27,32 +27,32 @@ public class UserService(
 
     internal static IList<User> Users = [];
         
-    protected override Task GetAllHandleInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetAllHandleInputAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task GetAllValidateInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetAllValidateInputAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task GetAllDefineRolesAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetAllDefineRolesAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task GetAllBindAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetAllBindAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task GetAllBeforeActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetAllBeforeActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task GetAllDefaultActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetAllDefaultActionAsync(IContext context)
     {
         var startIndex = context.GetRequiredValue<int>("Pagination.StartIndex");
         var itemsPerPage = context.GetRequiredValue<int>("Pagination.ItemsPerPage");
@@ -77,24 +77,24 @@ public class UserService(
         return Task.CompletedTask;
     }
 
-    protected override Task GetAllAfterActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetAllAfterActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task GetAllReleaseUnmanagedResourcesAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetAllReleaseUnmanagedResourcesAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task GetByIdHandleInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetByIdHandleInputAsync(IContext context)
     {
         var id = Guid.Parse(context.GetRequiredRouteValue<string>("userId"));
         context.State.UserId = id;
         return Task.CompletedTask;
     }
 
-    protected override Task GetByIdValidateInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetByIdValidateInputAsync(IContext context)
     {
         var id = context.GetRequiredValue<Guid>("UserId");
         var user = Users.FirstOrDefault(u => u.UniqueId == id);
@@ -106,40 +106,40 @@ public class UserService(
         return Task.CompletedTask;
     }
 
-    protected override Task GetByIdDefineRolesAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetByIdDefineRolesAsync(IContext context)
     {
         var user = context.GetRequiredValue<User>("User");
         context.Roles["User"] = user;
         return Task.CompletedTask;
     }
 
-    protected override Task GetByIdBindAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetByIdBindAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task GetByIdBeforeActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetByIdBeforeActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task GetByIdDefaultActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetByIdDefaultActionAsync(IContext context)
     {
         context.Result = ((User)context.Roles["User"]).ToJson();
         return Task.CompletedTask;
     }
 
-    protected override Task GetByIdAfterActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetByIdAfterActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task GetByIdReleaseUnmanagedResourcesAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetByIdReleaseUnmanagedResourcesAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override async Task CreateHandleInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override async Task CreateHandleInputAsync(IContext context)
     {
         var schemaId = configuration[JsonSchemaIdForUserKey]!;
         var jsonSchema = await jsonSchemaProvider.ResolveJsonSchemaAsync(context, schemaId);
@@ -149,7 +149,7 @@ public class UserService(
         context.State.Messages = messages;
     }
 
-    protected override Task CreateValidateInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task CreateValidateInputAsync(IContext context)
     {
         var messages = context.GetRequiredValue<IList<string>>("Messages");
         if (messages.Count > 0)
@@ -159,24 +159,24 @@ public class UserService(
         return Task.CompletedTask;
     }
 
-    protected override Task CreateDefineRolesAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task CreateDefineRolesAsync(IContext context)
     {
         var user = context.GetRequiredValue<User>("User");
         context.Roles["User"] = user;
         return Task.CompletedTask;
     }
 
-    protected override Task CreateBindAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task CreateBindAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task CreateBeforeActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task CreateBeforeActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task CreateDefaultActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task CreateDefaultActionAsync(IContext context)
     {
         var user = context.Roles["User"];
         user.Id = (Users.Max(a => a.Id) ?? 0) + 1; // This should be generated by the DB
@@ -187,60 +187,60 @@ public class UserService(
         return Task.CompletedTask;
     }
 
-    protected override Task CreateAfterActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task CreateAfterActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task CreateReleaseUnmanagedResourcesAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task CreateReleaseUnmanagedResourcesAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task UpdateHandleInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task UpdateHandleInputAsync(IContext context)
     {
         throw new NotImplementedException();
     }
 
-    protected override Task UpdateValidateInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task UpdateValidateInputAsync(IContext context)
     {
         throw new NotImplementedException();
     }
 
-    protected override Task UpdateDefineRolesAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task UpdateDefineRolesAsync(IContext context)
     {
         throw new NotImplementedException();
     }
 
-    protected override Task UpdateBindAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task UpdateBindAsync(IContext context)
     {
         throw new NotImplementedException();
     }
 
-    protected override Task UpdateBeforeActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task UpdateBeforeActionAsync(IContext context)
     {
         throw new NotImplementedException();
     }
 
-    protected override Task UpdateDefaultActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task UpdateDefaultActionAsync(IContext context)
     {
         throw new NotImplementedException();
     }
 
-    protected override Task UpdateAfterActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task UpdateAfterActionAsync(IContext context)
     {
         throw new NotImplementedException();
     }
 
-    protected override Task UpdateReleaseUnmanagedResourcesAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task UpdateReleaseUnmanagedResourcesAsync(IContext context)
     {
         throw new NotImplementedException();
     }
 
-    protected override async Task PatchHandleInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override async Task PatchHandleInputAsync(IContext context)
     {
         var json = context.GetRequiredValue<string>("Operations");
-        await GetByIdAsync(context, cancellationToken);
+        await GetByIdAsync(context);
         var user = ((User)context.Roles["User"])
             .WithObservableProxy();
         context.Roles["User"] = user;
@@ -248,7 +248,7 @@ public class UserService(
         context.State.Operations = operations;
     }
 
-    protected override Task PatchValidateInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task PatchValidateInputAsync(IContext context)
     {
         var operations = context.GetRequiredValue<IList<OperationNode>>("Operations");
         if (operations.Count == 0)
@@ -258,24 +258,24 @@ public class UserService(
         return Task.CompletedTask;
     }
 
-    protected override Task PatchDefineRolesAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task PatchDefineRolesAsync(IContext context)
     {
         var operations = context.GetRequiredValue<IList<OperationNode>>("Operations");
         context.Roles["Operations"] = operations;
         return Task.CompletedTask;
     }
 
-    protected override Task PatchBindAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task PatchBindAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task PatchBeforeActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task PatchBeforeActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override async Task PatchDefaultActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override async Task PatchDefaultActionAsync(IContext context)
     {
         foreach (var operationNode in context.Roles["Operations"])
         {
@@ -286,27 +286,27 @@ public class UserService(
         }
     }
 
-    protected override Task PatchAfterActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task PatchAfterActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task PatchReleaseUnmanagedResourcesAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task PatchReleaseUnmanagedResourcesAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task DeleteHandleInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task DeleteHandleInputAsync(IContext context)
     {
         var id = Guid.Parse(context.GetRequiredRouteValue<string>("userId"));
         context.State.UserId = id;
         return Task.CompletedTask;
     }
 
-    protected override async Task DeleteValidateInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override async Task DeleteValidateInputAsync(IContext context)
     {
         var id = context.GetRequiredValue<Guid>("UserId");
-        await GetByIdAsync(context, cancellationToken);
+        await GetByIdAsync(context);
         var user = (User)context.Roles["User"];
         if (user == null)
         {
@@ -314,33 +314,33 @@ public class UserService(
         }
     }
 
-    protected override Task DeleteDefineRolesAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task DeleteDefineRolesAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task DeleteBindAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task DeleteBindAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task DeleteBeforeActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task DeleteBeforeActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task DeleteDefaultActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task DeleteDefaultActionAsync(IContext context)
     {
         Users.Remove(context.Roles["User"]);
         return Task.CompletedTask;
     }
 
-    protected override Task DeleteAfterActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task DeleteAfterActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task DeleteReleaseUnmanagedResourcesAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task DeleteReleaseUnmanagedResourcesAsync(IContext context)
     {
         return Task.CompletedTask;
     }

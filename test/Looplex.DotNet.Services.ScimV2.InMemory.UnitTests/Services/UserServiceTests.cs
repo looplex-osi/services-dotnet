@@ -42,6 +42,7 @@ public class UserServiceTests
         var roles = new Dictionary<string, dynamic>();
         _context.Roles.Returns(roles);
         _cancellationToken = new CancellationToken();
+        _context.State.CancellationToken = _cancellationToken;
     }
 
     [TestMethod]
@@ -60,7 +61,7 @@ public class UserServiceTests
         UserService.Users.Add(existingUser);
             
         // Act
-        await _userService.GetAllAsync(_context, _cancellationToken);
+        await _userService.GetAllAsync(_context);
 
         // Assert
         var result = JsonConvert.DeserializeObject<ListResponse>((string)_context.Result!)!;
@@ -78,7 +79,7 @@ public class UserServiceTests
         };
         
         // Act & Assert
-        await Assert.ThrowsExceptionAsync<EntityNotFoundException>(() => _userService.GetByIdAsync(_context, _cancellationToken));
+        await Assert.ThrowsExceptionAsync<EntityNotFoundException>(() => _userService.GetByIdAsync(_context));
     }
 
     [TestMethod]
@@ -98,7 +99,7 @@ public class UserServiceTests
         UserService.Users.Add(existingUser);
 
         // Act
-        await _userService.GetByIdAsync(_context, _cancellationToken);
+        await _userService.GetByIdAsync(_context);
             
         // Assert
         JsonConvert.DeserializeObject<User>(_context.Result!.ToString()!).Should().BeEquivalentTo(existingUser);
@@ -117,7 +118,7 @@ public class UserServiceTests
             .Returns("{}");
         
         // Act
-        await _userService.CreateAsync(_context, _cancellationToken);
+        await _userService.CreateAsync(_context);
 
         // Assert
         Assert.IsNotNull(_context.Result);
@@ -143,7 +144,7 @@ public class UserServiceTests
         };
         
         // Act
-        var action = () => _userService.PatchAsync(_context, _cancellationToken);
+        var action = () => _userService.PatchAsync(_context);
 
         // Assert
         var ex = await Assert.ThrowsExceptionAsync<ArgumentException>(() => action());
@@ -168,7 +169,7 @@ public class UserServiceTests
         };
         
         // Act
-        await _userService.PatchAsync(_context, _cancellationToken);
+        await _userService.PatchAsync(_context);
 
         // Assert
         var user = UserService.Users.First(u => u.Id == existingUser.Id);
@@ -186,7 +187,7 @@ public class UserServiceTests
         };
         
         // Act & Assert
-        await Assert.ThrowsExceptionAsync<EntityNotFoundException>(() => _userService.DeleteAsync(_context, _cancellationToken));
+        await Assert.ThrowsExceptionAsync<EntityNotFoundException>(() => _userService.DeleteAsync(_context));
     }
     
     [TestMethod]
@@ -206,7 +207,7 @@ public class UserServiceTests
         UserService.Users.Add(existingUser);
 
         // Act
-        await _userService.DeleteAsync(_context, _cancellationToken);
+        await _userService.DeleteAsync(_context);
 
         // Assert
         UserService.Users.Should().NotContain(u => u.Id == existingUser.Id);

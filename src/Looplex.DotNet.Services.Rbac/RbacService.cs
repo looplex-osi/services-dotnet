@@ -15,8 +15,9 @@ public class RbacService(
     private readonly IEnforcer _enforcer = enforcer;
     private readonly ILogger<RbacService> _logger = logger;
     
-    public virtual void ThrowIfUnauthorized(IContext context, string resource, string action, CancellationToken cancellationToken) 
+    public virtual void ThrowIfUnauthorized(IContext context, string resource, string action) 
     {
+        var cancellationToken = context.GetRequiredValue<CancellationToken>("CancellationToken");
         cancellationToken.ThrowIfCancellationRequested();
 
         var userId = context.GetRequiredValue<string>("User.Email");

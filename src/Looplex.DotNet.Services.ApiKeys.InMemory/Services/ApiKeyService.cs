@@ -35,32 +35,32 @@ public class ApiKeyService(
     private readonly IExtensionPointOrchestrator _extensionPointOrchestrator = extensionPointOrchestrator;
     private readonly IRbacService _rbacService = rbacService;
 
-    protected override Task GetAllHandleInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetAllHandleInputAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task GetAllValidateInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetAllValidateInputAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task GetAllDefineRolesAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetAllDefineRolesAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task GetAllBindAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetAllBindAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task GetAllBeforeActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetAllBeforeActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task GetAllDefaultActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetAllDefaultActionAsync(IContext context)
     {
         var startIndex = context.GetRequiredValue<int>("Pagination.StartIndex");
         var itemsPerPage = context.GetRequiredValue<int>("Pagination.ItemsPerPage");
@@ -84,25 +84,24 @@ public class ApiKeyService(
         return Task.CompletedTask;
     }
 
-    protected override Task GetAllAfterActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetAllAfterActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task GetAllReleaseUnmanagedResourcesAsync(IContext context,
-        CancellationToken cancellationToken)
+    protected override Task GetAllReleaseUnmanagedResourcesAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task GetByIdHandleInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetByIdHandleInputAsync(IContext context)
     {
         var id = Guid.Parse(context.GetRequiredRouteValue<string>("clientCredentialId"));
         context.State.ClientCredentialId = id;
         return Task.CompletedTask;
     }
 
-    protected override Task GetByIdValidateInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetByIdValidateInputAsync(IContext context)
     {
         var id = context.GetRequiredValue<Guid>("ClientCredentialId");
         var clientCredential = ClientCredentials.FirstOrDefault(c => c.UniqueId == id);
@@ -114,41 +113,40 @@ public class ApiKeyService(
         return Task.CompletedTask;
     }
 
-    protected override Task GetByIdDefineRolesAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetByIdDefineRolesAsync(IContext context)
     {
         var clientCredential = context.GetRequiredValue<ClientCredential>("ClientCredential");
         context.Roles.Add("ClientCredential", clientCredential);
         return Task.CompletedTask;
     }
 
-    protected override Task GetByIdBindAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetByIdBindAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task GetByIdBeforeActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetByIdBeforeActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task GetByIdDefaultActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetByIdDefaultActionAsync(IContext context)
     {
         context.Result = ((ClientCredential)context.Roles["ClientCredential"]).ToJson();
         return Task.CompletedTask;
     }
 
-    protected override Task GetByIdAfterActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task GetByIdAfterActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task GetByIdReleaseUnmanagedResourcesAsync(IContext context,
-        CancellationToken cancellationToken)
+    protected override Task GetByIdReleaseUnmanagedResourcesAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override async Task CreateHandleInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override async Task CreateHandleInputAsync(IContext context)
     {
         var json = context.GetRequiredValue<string>("Resource");
         var schemaId = configuration[JsonSchemaIdForClientCredentialKey]!;
@@ -158,7 +156,7 @@ public class ApiKeyService(
         context.State.Messages = messages;
     }
 
-    protected override Task CreateValidateInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task CreateValidateInputAsync(IContext context)
     {
         var messages = context.GetRequiredValue<IList<string>>("Messages");
         if (messages.Count > 0)
@@ -169,24 +167,24 @@ public class ApiKeyService(
         return Task.CompletedTask;
     }
 
-    protected override Task CreateDefineRolesAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task CreateDefineRolesAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task CreateBindAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task CreateBindAsync(IContext context)
     {
         var clientCredential = context.GetRequiredValue<ClientCredential>("ClientCredential");
         context.Roles.Add("ClientCredential", clientCredential);
         return Task.CompletedTask;
     }
 
-    protected override Task CreateBeforeActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task CreateBeforeActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override async Task CreateDefaultActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override async Task CreateDefaultActionAsync(IContext context)
     {
         var clientCredential = (ClientCredential)context.Roles["ClientCredential"];
 
@@ -235,62 +233,60 @@ public class ApiKeyService(
         return digest;
     }
 
-    protected override Task CreateAfterActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task CreateAfterActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task CreateReleaseUnmanagedResourcesAsync(IContext context,
-        CancellationToken cancellationToken)
+    protected override Task CreateReleaseUnmanagedResourcesAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task UpdateHandleInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task UpdateHandleInputAsync(IContext context)
     {
         throw new NotImplementedException();
     }
 
-    protected override Task UpdateValidateInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task UpdateValidateInputAsync(IContext context)
     {
         throw new NotImplementedException();
     }
 
-    protected override Task UpdateDefineRolesAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task UpdateDefineRolesAsync(IContext context)
     {
         throw new NotImplementedException();
     }
 
-    protected override Task UpdateBindAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task UpdateBindAsync(IContext context)
     {
         throw new NotImplementedException();
     }
 
-    protected override Task UpdateBeforeActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task UpdateBeforeActionAsync(IContext context)
     {
         throw new NotImplementedException();
     }
 
-    protected override Task UpdateDefaultActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task UpdateDefaultActionAsync(IContext context)
     {
         throw new NotImplementedException();
     }
 
-    protected override Task UpdateAfterActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task UpdateAfterActionAsync(IContext context)
     {
         throw new NotImplementedException();
     }
 
-    protected override Task UpdateReleaseUnmanagedResourcesAsync(IContext context,
-        CancellationToken cancellationToken)
+    protected override Task UpdateReleaseUnmanagedResourcesAsync(IContext context)
     {
         throw new NotImplementedException();
     }
 
-    protected override async Task PatchHandleInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override async Task PatchHandleInputAsync(IContext context)
     {
         var json = context.GetRequiredValue<string>("Operations");
-        await GetByIdAsync(context, cancellationToken);
+        await GetByIdAsync(context);
         var clientCredential = ((ClientCredential)context.Roles["ClientCredential"])
             .WithObservableProxy();
         context.Roles["ClientCredential"] = clientCredential;
@@ -298,7 +294,7 @@ public class ApiKeyService(
         context.State.Operations = operations;
     }
 
-    protected override Task PatchValidateInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task PatchValidateInputAsync(IContext context)
     {
         var operations = context.GetRequiredValue<IList<OperationNode>>("Operations");
         if (operations.Count == 0)
@@ -317,24 +313,24 @@ public class ApiKeyService(
         return Task.CompletedTask;
     }
 
-    protected override Task PatchDefineRolesAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task PatchDefineRolesAsync(IContext context)
     {
         var operations = context.GetRequiredValue<IList<OperationNode>>("Operations");
         context.Roles["Operations"] = operations;
         return Task.CompletedTask;
     }
 
-    protected override Task PatchBindAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task PatchBindAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task PatchBeforeActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task PatchBeforeActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override async Task PatchDefaultActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override async Task PatchDefaultActionAsync(IContext context)
     {
         foreach (var operationNode in context.Roles["Operations"])
         {
@@ -345,28 +341,27 @@ public class ApiKeyService(
         }
     }
 
-    protected override Task PatchAfterActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task PatchAfterActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task PatchReleaseUnmanagedResourcesAsync(IContext context,
-        CancellationToken cancellationToken)
+    protected override Task PatchReleaseUnmanagedResourcesAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task DeleteHandleInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task DeleteHandleInputAsync(IContext context)
     {
         var id = Guid.Parse(context.GetRequiredRouteValue<string>("clientCredentialId"));
         context.State.ClientCredentialId = id;
         return Task.CompletedTask;
     }
 
-    protected override async Task DeleteValidateInputAsync(IContext context, CancellationToken cancellationToken)
+    protected override async Task DeleteValidateInputAsync(IContext context)
     {
         var id = context.GetRequiredValue<Guid>("ClientCredentialId");
-        await GetByIdAsync(context, cancellationToken);
+        await GetByIdAsync(context);
         var clientCredential = (ClientCredential)context.Roles["ClientCredential"];
         if (clientCredential == null)
         {
@@ -374,41 +369,40 @@ public class ApiKeyService(
         }
     }
 
-    protected override Task DeleteDefineRolesAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task DeleteDefineRolesAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task DeleteBindAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task DeleteBindAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task DeleteBeforeActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task DeleteBeforeActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task DeleteDefaultActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task DeleteDefaultActionAsync(IContext context)
     {
         ClientCredentials.Remove(context.Roles["ClientCredential"]);
         return Task.CompletedTask;
     }
 
-    protected override Task DeleteAfterActionAsync(IContext context, CancellationToken cancellationToken)
+    protected override Task DeleteAfterActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    protected override Task DeleteReleaseUnmanagedResourcesAsync(IContext context,
-        CancellationToken cancellationToken)
+    protected override Task DeleteReleaseUnmanagedResourcesAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    public Task GetByIdAndSecretOrDefaultAsync(IContext context, CancellationToken cancellationToken)
+    public Task GetByIdAndSecretOrDefaultAsync(IContext context)
     {
-        _rbacService.ThrowIfUnauthorized(context, GetType().Name, this.GetCallerName(), cancellationToken);
+        _rbacService.ThrowIfUnauthorized(context, GetType().Name, this.GetCallerName());
         
         return _extensionPointOrchestrator.OrchestrateAsync(
             context,
@@ -419,11 +413,10 @@ public class ApiKeyService(
             GetByIdAndSecretOrDefaultBeforeActionAsync,
             GetByIdAndSecretOrDefaultDefaultActionAsync,
             GetByIdAndSecretOrDefaultAfterActionAsync,
-            GetByIdAndSecretOrDefaultReleaseUnmanagedResourcesAsync,
-            cancellationToken);
+            GetByIdAndSecretOrDefaultReleaseUnmanagedResourcesAsync);
     }
 
-    private Task GetByIdAndSecretOrDefaultHandleInputAsync(IContext context, CancellationToken cancellationToken)
+    private Task GetByIdAndSecretOrDefaultHandleInputAsync(IContext context)
     {
         Guid clientId = Guid.Parse(context.State.ClientId);
         string clientSecret = context.State.ClientSecret; 
@@ -436,12 +429,12 @@ public class ApiKeyService(
         return Task.CompletedTask;
     }
 
-    private Task GetByIdAndSecretOrDefaultValidateInputAsync(IContext context, CancellationToken cancellationToken)
+    private Task GetByIdAndSecretOrDefaultValidateInputAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    private Task GetByIdAndSecretOrDefaultDefineRolesAsync(IContext context, CancellationToken cancellationToken)
+    private Task GetByIdAndSecretOrDefaultDefineRolesAsync(IContext context)
     {
         var digest = context.GetValue<string>("Digest");
         var clientCredential = context.GetValue<ClientCredential>("ClientCredential");
@@ -453,17 +446,17 @@ public class ApiKeyService(
         return Task.CompletedTask;
     }
 
-    private Task GetByIdAndSecretOrDefaultBindAsync(IContext context, CancellationToken cancellationToken)
+    private Task GetByIdAndSecretOrDefaultBindAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    private Task GetByIdAndSecretOrDefaultBeforeActionAsync(IContext context, CancellationToken cancellationToken)
+    private Task GetByIdAndSecretOrDefaultBeforeActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    private Task GetByIdAndSecretOrDefaultDefaultActionAsync(IContext context, CancellationToken cancellationToken)
+    private Task GetByIdAndSecretOrDefaultDefaultActionAsync(IContext context)
     {
         if (context.Roles.TryGetValue("ClientCredential", out var role))
         {
@@ -473,13 +466,12 @@ public class ApiKeyService(
         return Task.CompletedTask;
     }
 
-    private Task GetByIdAndSecretOrDefaultAfterActionAsync(IContext context, CancellationToken cancellationToken)
+    private Task GetByIdAndSecretOrDefaultAfterActionAsync(IContext context)
     {
         return Task.CompletedTask;
     }
 
-    private Task GetByIdAndSecretOrDefaultReleaseUnmanagedResourcesAsync(IContext context,
-        CancellationToken cancellationToken)
+    private Task GetByIdAndSecretOrDefaultReleaseUnmanagedResourcesAsync(IContext context)
     {
         return Task.CompletedTask;
     }

@@ -42,6 +42,7 @@ public class GroupServiceTests
         var roles = new Dictionary<string, dynamic>();
         _context.Roles.Returns(roles);
         _cancellationToken = new CancellationToken();
+        _context.State.CancellationToken = _cancellationToken;
     }
 
     [TestMethod]
@@ -60,7 +61,7 @@ public class GroupServiceTests
         GroupService.Groups.Add(existingGroup);
             
         // Act
-        await _groupService.GetAllAsync(_context, _cancellationToken);
+        await _groupService.GetAllAsync(_context);
 
         // Assert
         var result = JsonConvert.DeserializeObject<ListResponse>((string)_context.Result!)!;
@@ -78,7 +79,7 @@ public class GroupServiceTests
         };
         
         // Act & Assert
-        await Assert.ThrowsExceptionAsync<EntityNotFoundException>(() => _groupService.GetByIdAsync(_context, _cancellationToken));
+        await Assert.ThrowsExceptionAsync<EntityNotFoundException>(() => _groupService.GetByIdAsync(_context));
     }
 
     [TestMethod]
@@ -98,7 +99,7 @@ public class GroupServiceTests
         GroupService.Groups.Add(existingGroup);
 
         // Act
-        await _groupService.GetByIdAsync(_context, _cancellationToken);
+        await _groupService.GetByIdAsync(_context);
             
         // Assert
         JsonConvert.DeserializeObject<Group>(_context.Result!.ToString()!).Should().BeEquivalentTo(existingGroup);
@@ -117,7 +118,7 @@ public class GroupServiceTests
             .Returns("{}");
         
         // Act
-        await _groupService.CreateAsync(_context, _cancellationToken);
+        await _groupService.CreateAsync(_context);
 
         // Assert
         Assert.IsNotNull(_context.Result);
@@ -144,7 +145,7 @@ public class GroupServiceTests
         _context.State.Id = existingGroup.UniqueId.ToString()!;
 
         // Act
-        await _groupService.PatchAsync(_context, _cancellationToken);
+        await _groupService.PatchAsync(_context);
 
         // Assert
         var group = GroupService.Groups.First(u => u.Id == existingGroup.Id);
@@ -161,7 +162,7 @@ public class GroupServiceTests
             { "groupId", Guid.NewGuid().ToString() }
         };
         // Act & Assert
-        await Assert.ThrowsExceptionAsync<EntityNotFoundException>(() => _groupService.DeleteAsync(_context, _cancellationToken));
+        await Assert.ThrowsExceptionAsync<EntityNotFoundException>(() => _groupService.DeleteAsync(_context));
     }
     
     [TestMethod]
@@ -182,7 +183,7 @@ public class GroupServiceTests
         GroupService.Groups.Add(existingGroup);
 
         // Act
-        await _groupService.DeleteAsync(_context, _cancellationToken);
+        await _groupService.DeleteAsync(_context);
 
         // Assert
         GroupService.Groups.Should().NotContain(u => u.UniqueId == existingGroup.UniqueId);
