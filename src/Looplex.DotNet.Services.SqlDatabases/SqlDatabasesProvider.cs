@@ -11,8 +11,6 @@ public class SqlDatabasesProvider(
     IConfiguration configuration,
     ISecretsService secretsService) : ISqlDatabaseProvider
 {
-    const string RoutingDatabaseConnectionStringKey = "RoutingDatabaseConnectionString";
-
     private ISqlDatabaseService? _routingDatabaseService;
 
     internal ISqlDatabaseService RoutingDatabaseService
@@ -21,7 +19,7 @@ public class SqlDatabasesProvider(
         {
             if (_routingDatabaseService == null)
             {
-                var routingConnString = configuration[RoutingDatabaseConnectionStringKey];
+                var routingConnString = configuration[Constants.RoutingDatabaseConnectionStringKey];
 
                 var connection = new SqlConnection(routingConnString);
                 _routingDatabaseService = new SqlDatabaseService(connection);

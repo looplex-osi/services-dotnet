@@ -10,6 +10,12 @@ public static class SqlDatabasesExtensionMethods
         services.AddSingleton<ISqlDatabaseProvider, SqlDatabasesProvider>();
     }
     
+    public static void AddRoutingDatabaseHealthChecks(this IServiceCollection services, string name = "RoutingDatabase")
+    {
+        services.AddHealthChecks()
+            .AddCheck<RoutingDatabaseHealthCheck>(name);
+    }
+    
     public static void AddSqlDatabaseHealthChecks(this IServiceCollection services, string name = "SqlDatabase")
     {
         services.AddHealthChecks()
