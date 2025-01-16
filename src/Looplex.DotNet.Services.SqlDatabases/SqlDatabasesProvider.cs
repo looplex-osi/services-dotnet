@@ -71,7 +71,7 @@ public class SqlDatabasesProvider(
 
             logger.LogInformation(
                 "Database: Getting connection string for tenant {Tenant}. Result: {ConnectionString}",
-                domain, customerConnStringKeyVaultId);
+                domain, customerConnString);
         }
         catch (Exception e)
         {
