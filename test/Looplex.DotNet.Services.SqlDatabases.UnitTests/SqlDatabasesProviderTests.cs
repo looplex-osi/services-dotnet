@@ -2,6 +2,8 @@ using FluentAssertions;
 using Looplex.DotNet.Core.Application.Abstractions.Services;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Looplex.DotNet.Services.SqlDatabases.UnitTests;
@@ -13,7 +15,10 @@ public class SqlDatabasesProviderTests
     private ISecretsService _secretsService = null!;
     private ISqlDatabaseService _routingDatabaseService = null!;
     private SqlDatabasesProvider _sqlDatabasesProvider = null!;
+    private IHostEnvironment _hostEnvironment = null!;
+    private ILogger<SqlDatabasesProvider> _logger = null!;
 
+    
     [TestInitialize]
     public void Setup()
     {
@@ -21,7 +26,9 @@ public class SqlDatabasesProviderTests
         _configuration["RoutingDatabaseConnectionString"] = "Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;";
         _secretsService = Substitute.For<ISecretsService>();
         _routingDatabaseService = Substitute.For<ISqlDatabaseService>();
-        _sqlDatabasesProvider = new SqlDatabasesProvider(_configuration, _secretsService);
+        _hostEnvironment = Substitute.For<IHostEnvironment>();
+        _logger = Substitute.For<ILogger<SqlDatabasesProvider>>();
+        _sqlDatabasesProvider = new SqlDatabasesProvider(_hostEnvironment, _logger, _configuration, _secretsService);
     }
 
     [TestMethod]
