@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="2.3.10"></a>
+## 2.3.10 (2025-01-16)
+
+### Bug Fixes
+
+* **logs:** database log was leaking password when not in dev mode
+
 <a name="2.3.9"></a>
 ## 2.3.9 (2025-01-16)
 
