@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="2.3.11"></a>
+## 2.3.11 (2025-02-11)
+
+### Bug Fixes
+
+* **rbac:** rbac throws .net framework exceptions instead of error from scimv2
+
 <a name="2.3.10"></a>
 ## 2.3.10 (2025-01-16)
 
