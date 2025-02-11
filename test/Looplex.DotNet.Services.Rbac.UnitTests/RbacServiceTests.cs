@@ -2,7 +2,6 @@ using System.Dynamic;
 using System.Reflection;
 using Casbin;
 using FluentAssertions;
-using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Looplex.OpenForExtension.Abstractions.Contexts;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -68,7 +67,7 @@ public class RbacServiceTests
         var action = () => _rbacService.ThrowIfUnauthorized(_context, "resource", "read");
         
         // Assert
-        action.Should().Throw<Error>().WithMessage("User email is required for authorization");
+        action.Should().Throw<ArgumentNullException>().WithMessage("USER_EMAIL_REQUIRED_FOR_AUTHORIZATION (Parameter 'email')");
     }
         
     [TestMethod]
@@ -95,7 +94,7 @@ public class RbacServiceTests
         var action = () => _rbacService.ThrowIfUnauthorized(_context, "resource", "read");
         
         // Assert
-        action.Should().Throw<Error>().WithMessage("Tenant is required for authorization");
+        action.Should().Throw<ArgumentNullException>().WithMessage("TENANT_REQUIRED_FOR_AUTHORIZATION (Parameter 'tenant')");
     }
         
     [TestMethod]
@@ -126,6 +125,6 @@ public class RbacServiceTests
         var act = () => _rbacService.ThrowIfUnauthorized(_context, "resource", action);
         
         // Assert
-        act.Should().Throw<Error>().WithMessage("No authorization to access this resource");
+        act.Should().Throw<UnauthorizedAccessException>().WithMessage("UNAUTHORIZED_ACCESS");
     }
 }

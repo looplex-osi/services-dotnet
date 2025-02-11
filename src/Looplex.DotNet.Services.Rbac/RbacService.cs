@@ -1,8 +1,6 @@
-﻿using System.Net;
-using Casbin;
+﻿using Casbin;
 using Looplex.DotNet.Core.Application.Abstractions.Services;
 using Looplex.DotNet.Core.Application.ExtensionMethods;
-using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Looplex.OpenForExtension.Abstractions.Contexts;
 using Microsoft.Extensions.Logging;
 
@@ -20,20 +18,20 @@ public class RbacService(
         var cancellationToken = context.GetRequiredValue<CancellationToken>("CancellationToken");
         cancellationToken.ThrowIfCancellationRequested();
 
-        var userId = context.GetRequiredValue<string>("User.Email");
+        var email = context.GetRequiredValue<string>("User.Email");
         
         var tenant = context.GetRequiredValue<string>("Tenant");
 
         if (string.IsNullOrEmpty(tenant))
-            throw new Error("Tenant is required for authorization", (int)HttpStatusCode.Unauthorized);
+            throw new ArgumentNullException(nameof(tenant), "TENANT_REQUIRED_FOR_AUTHORIZATION");
 
-        if (string.IsNullOrEmpty(userId))
-            throw new Error("User email is required for authorization", (int)HttpStatusCode.Unauthorized);
+        if (string.IsNullOrEmpty(email))
+            throw new ArgumentNullException(nameof(email), "USER_EMAIL_REQUIRED_FOR_AUTHORIZATION");
 
-        var authorized = CheckPermissionAsync(userId, tenant, resource, action);
+        var authorized = CheckPermissionAsync(email, tenant, resource, action);
 
         if (!authorized)
-            throw new Error("No authorization to access this resource", (int)HttpStatusCode.Unauthorized);
+            throw new UnauthorizedAccessException("UNAUTHORIZED_ACCESS");
     }
     
     private bool CheckPermissionAsync(string userId, string tenant, string resource, string action)
