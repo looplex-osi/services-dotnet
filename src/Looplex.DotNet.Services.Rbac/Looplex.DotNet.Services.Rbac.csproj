@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>true</IsPackable>
@@ -16,8 +16,8 @@
 
   <ItemGroup>
     <PackageReference Include="Casbin.NET" Version="2.12.0" />
-    <PackageReference Include="Looplex.DotNet.Core.Application" Version="4.0.2" />
-    <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2.Domain" Version="3.0.2" />
+    <PackageReference Include="Looplex.DotNet.Core.Application" Version="4.0.4" />
+    <PackageReference Include="Looplex.DotNet.Middlewares.ScimV2.Domain" Version="3.0.4" />
   </ItemGroup>
 
 </Project>
