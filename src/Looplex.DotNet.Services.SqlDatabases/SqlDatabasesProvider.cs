@@ -37,7 +37,7 @@ public class SqlDatabasesProvider(
     public async Task<ISqlDatabaseService> GetDatabaseAsync(string domain)
     {
         var query = @"
-            SELECT d.keyvault_id AS keyvault_id
+            SELECT d.name AS Name, d.keyvault_id AS KeyVaultId
                 
             FROM lawoffice.databases d
             JOIN lawoffice.customers_databases cd ON 
@@ -49,10 +49,10 @@ public class SqlDatabasesProvider(
                 AND c.status = @Status
         ";
 
-        var customerConnStringKeyVaultId = await RoutingDatabaseService
-            .QueryFirstOrDefaultAsync<string>(query, new { Domain = domain, Status = (int)CustomerStatus.Active });
+        var database = await RoutingDatabaseService
+            .QueryFirstOrDefaultAsync<LawOfficeDatabase>(query, new { Domain = domain, Status = (int)CustomerStatus.Active });
 
-        if (string.IsNullOrEmpty(customerConnStringKeyVaultId))
+        if (string.IsNullOrEmpty(database?.KeyVaultId) || string.IsNullOrEmpty(database?.Name))
         {
             logger.LogError("Unable to connect to database for tenant {Tenant}. Key vault id is null or empty", domain);
             throw new Error($"Unable to connect to database for domain {domain}",
@@ -60,7 +60,8 @@ public class SqlDatabasesProvider(
         }
 
         var customerConnString = await secretsService
-            .GetSecretAsync(customerConnStringKeyVaultId);
+            .GetSecretAsync(database.KeyVaultId);
+        var databaseName = database.Name;
         
         try
         {
@@ -81,6 +82,14 @@ public class SqlDatabasesProvider(
         }
         
         var connection = new SqlConnection(customerConnString);
-        return new SqlDatabaseService(connection);
+        var db = new SqlDatabaseService(connection);
+        db.DatabaseName = databaseName;
+        return db;
     }
+}
+
+internal class LawOfficeDatabase
+{
+    public string? Name { get; set; }
+    public string? KeyVaultId { get; set; }
 }

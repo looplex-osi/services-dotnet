@@ -16,9 +16,8 @@ public class RoutingDatabaseHealthCheck(IConfiguration configuration) : IHealthC
         {
             var routingConnString = configuration[Constants.RoutingDatabaseConnectionStringKey];
 
-            var connection = new SqlConnection(routingConnString);
-            using var routingDatabaseService = new SqlDatabaseService(connection);
-            routingDatabaseService.OpenConnection();
+            using var connection = new SqlConnection(routingConnString);
+            connection.Open();
             
             return Task.FromResult(HealthCheckResult.Healthy($"Routing database is healthy."));
         }

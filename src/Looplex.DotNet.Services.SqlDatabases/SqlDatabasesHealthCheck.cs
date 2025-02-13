@@ -24,7 +24,7 @@ public class SqlDatabasesHealthCheck(
             }
             
             using var db = await sqlDatabaseProvider.GetDatabaseAsync(tenant.ToString());
-            db.OpenConnection();
+            await db.OpenConnectionAsync();
 
             return HealthCheckResult.Healthy($"Sql database for {tenant} is healthy.");
         }

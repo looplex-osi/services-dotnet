@@ -59,17 +59,21 @@ public class SqlDatabasesProviderTests
     {
         // Arrange
         var domain = "example.com";
-        var customerConnStringKeyVaultId = "keyvault-id";
+        var database = new LawOfficeDatabase
+        {
+            KeyVaultId = "keyvault-id",
+            Name = "dbName"
+        };
         string customerConnString = "Server=localhost;Database=myDataBase;User Id=myUsername;Password=myPassword;";
 
         _sqlDatabasesProvider.RoutingDatabaseService = _routingDatabaseService;
 
         _routingDatabaseService
-            .QueryFirstOrDefaultAsync<string>(Arg.Any<string>(), Arg.Any<object>())
-            .Returns(customerConnStringKeyVaultId);
+            .QueryFirstOrDefaultAsync<LawOfficeDatabase>(Arg.Any<string>(), Arg.Any<object>())
+            .Returns(database);
 
         _secretsService
-            .GetSecretAsync(customerConnStringKeyVaultId)
+            .GetSecretAsync(database.KeyVaultId)
             .Returns(customerConnString);
 
         // Act
@@ -111,14 +115,19 @@ public class SqlDatabasesProviderTests
     {
         // Arrange
         var domain = "example.com";
+        var database = new LawOfficeDatabase
+        {
+            KeyVaultId = "keyvault-id",
+            Name = "dbName"
+        };
         var customerConnStringKeyVaultId = "keyvault-id";
         string customerConnString = "Server=localhost;Database=myDataBase;User Id=myUsername;Password=myPassword;";
 
         _sqlDatabasesProvider.RoutingDatabaseService = _routingDatabaseService;
 
         _routingDatabaseService
-            .QueryFirstOrDefaultAsync<string>(Arg.Any<string>(), Arg.Any<object>())
-            .Returns(customerConnStringKeyVaultId);
+            .QueryFirstOrDefaultAsync<LawOfficeDatabase>(Arg.Any<string>(), Arg.Any<object>())
+            .Returns(database);
 
         _secretsService
             .GetSecretAsync(customerConnStringKeyVaultId)
@@ -145,17 +154,21 @@ public class SqlDatabasesProviderTests
     {
         // Arrange
         var domain = "example.com";
-        var customerConnStringKeyVaultId = "keyvault-id";
+        var database = new LawOfficeDatabase
+        {
+            KeyVaultId = "keyvault-id",
+            Name = "dbName"
+        };
         string customerConnString = "Server=localhost;Database=myDataBase;User Id=myUsername;Password=myPassword;";
 
         _sqlDatabasesProvider.RoutingDatabaseService = _routingDatabaseService;
 
         _routingDatabaseService
-            .QueryFirstOrDefaultAsync<string>(Arg.Any<string>(), Arg.Any<object>())
-            .Returns(customerConnStringKeyVaultId);
+            .QueryFirstOrDefaultAsync<LawOfficeDatabase>(Arg.Any<string>(), Arg.Any<object>())
+            .Returns(database);
 
         _secretsService
-            .GetSecretAsync(customerConnStringKeyVaultId)
+            .GetSecretAsync(database.KeyVaultId)
             .Returns(customerConnString);
 
         _hostEnvironment.EnvironmentName.Returns("any");
