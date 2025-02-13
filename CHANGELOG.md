@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="2.3.12"></a>
+## 2.3.12 (2025-02-13)
+
+### Bug Fixes
+
+* **databaseservice:** added a use database in the sql service
+
 <a name="2.3.11"></a>
 ## 2.3.11 (2025-02-11)
 
