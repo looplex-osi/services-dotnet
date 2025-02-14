@@ -12,8 +12,8 @@ public class SqlDatabaseService(SqlConnection connection) : ISqlDatabaseService
 
     public async Task OpenConnectionAsync()
     {
-        await UseDatabaseIfPossible();
         connection.Open();
+        await UseDatabaseIfPossible();
     }
 
     public void Dispose()
@@ -136,7 +136,7 @@ public class SqlDatabaseService(SqlConnection connection) : ISqlDatabaseService
     private Task UseDatabaseIfPossible()
     {
         return !string.IsNullOrEmpty(DatabaseName)
-            ? connection.ExecuteAsync($"USE @databaseName", new { DatabaseName })
+            ? connection.ExecuteAsync($"USE @DatabaseName", new { DatabaseName })
             : Task.CompletedTask;
     }
 }

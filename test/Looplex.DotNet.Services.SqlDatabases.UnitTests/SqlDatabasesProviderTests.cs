@@ -34,6 +34,43 @@ public class SqlDatabasesProviderTests
     }
 
     [TestMethod]
+    public async Task GetDatabase_ShouldReturnDatabaseService_WhenDatabseIsChached()
+    {
+        var domain = "example.com";
+        var database = new LawOfficeDatabase
+        {
+            KeyVaultId = "keyvault-id",
+            Name = "dbName"
+        };
+        string customerConnString = "Server=localhost;Database=myDataBase;User Id=myUsername;Password=myPassword;";
+
+        _sqlDatabasesProvider.RoutingDatabaseService = _routingDatabaseService;
+
+        _routingDatabaseService
+            .QueryFirstOrDefaultAsync<LawOfficeDatabase>(Arg.Any<string>(), Arg.Any<object>())
+            .Returns(database);
+
+        _secretsService
+            .GetSecretAsync(database.KeyVaultId)
+            .Returns(customerConnString);
+
+        // Make sure databse is chached
+        _ = await _sqlDatabasesProvider.GetDatabaseAsync(domain);
+        
+        // Act
+        var result = await _sqlDatabasesProvider.GetDatabaseAsync(domain);
+
+        // Assert
+        await _routingDatabaseService.Received(1)
+            .QueryFirstOrDefaultAsync<LawOfficeDatabase>(Arg.Any<string>(), Arg.Any<object>());
+        await _secretsService.Received(1)
+            .GetSecretAsync(database.KeyVaultId);
+        
+        result.Should().NotBeNull();
+        result.Should().BeOfType<SqlDatabaseService>();
+    }
+
+    [TestMethod]
     public void GetDatabase_ShouldThrowError_WhenNoConnectionStringFoundForDomain()
     {
         // Arrange

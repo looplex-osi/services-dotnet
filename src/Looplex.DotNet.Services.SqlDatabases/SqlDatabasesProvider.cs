@@ -17,6 +17,8 @@ public class SqlDatabasesProvider(
 {
     private ISqlDatabaseService? _routingDatabaseService;
 
+    private readonly IDictionary<string, LawOfficeDatabase> _connectionStringsCache = new Dictionary<string, LawOfficeDatabase>();
+
     internal ISqlDatabaseService RoutingDatabaseService
     {
         private get
@@ -36,6 +38,18 @@ public class SqlDatabasesProvider(
 
     public async Task<ISqlDatabaseService> GetDatabaseAsync(string domain)
     {
+        var database = _connectionStringsCache.TryGetValue(domain, out var value)
+            ? value
+            : await GetDatabaseUsingRoutingDatabaseAsync(domain);
+
+        var connection = new SqlConnection(database.ConnectionString);
+        var db = new SqlDatabaseService(connection);
+        db.DatabaseName = database.Name;
+        return db;
+    }
+
+    private async Task<LawOfficeDatabase> GetDatabaseUsingRoutingDatabaseAsync(string domain)
+    {
         var query = @"
             SELECT d.name AS Name, d.keyvault_id AS KeyVaultId
                 
@@ -48,24 +62,26 @@ public class SqlDatabasesProvider(
                     c.domain = @Domain
                 AND c.status = @Status
         ";
-
         var database = await RoutingDatabaseService
-            .QueryFirstOrDefaultAsync<LawOfficeDatabase>(query, new { Domain = domain, Status = (int)CustomerStatus.Active });
+            .QueryFirstOrDefaultAsync<LawOfficeDatabase>(query,
+                new { Domain = domain, Status = (int)CustomerStatus.Active });
 
         if (string.IsNullOrEmpty(database?.KeyVaultId) || string.IsNullOrEmpty(database?.Name))
         {
-            logger.LogError("Unable to connect to database for tenant {Tenant}. Key vault id is null or empty", domain);
+            logger.LogError("Unable to connect to database for tenant {Tenant}. Key vault id is null or empty",
+                domain);
             throw new Error($"Unable to connect to database for domain {domain}",
                 (int)HttpStatusCode.InternalServerError);
         }
 
-        var customerConnString = await secretsService
+        var connectionString = await secretsService
             .GetSecretAsync(database.KeyVaultId);
-        var databaseName = database.Name;
         
+        database.ConnectionString = connectionString;
+
         try
         {
-            var builder = new SqlConnectionStringBuilder(customerConnString);
+            var builder = new SqlConnectionStringBuilder(connectionString);
 
             if (!hostEnvironment.IsDevelopment())
                 builder.Password = "****";
@@ -80,16 +96,16 @@ public class SqlDatabasesProvider(
             throw new Error($"Unable to connect to database for tenant {domain}",
                 (int)HttpStatusCode.InternalServerError, e);
         }
+
+        _connectionStringsCache.Add(domain, database);
         
-        var connection = new SqlConnection(customerConnString);
-        var db = new SqlDatabaseService(connection);
-        db.DatabaseName = databaseName;
-        return db;
+        return database;
     }
 }
 
 internal class LawOfficeDatabase
 {
     public string? Name { get; set; }
+    public string? ConnectionString { get; set; }
     public string? KeyVaultId { get; set; }
 }
