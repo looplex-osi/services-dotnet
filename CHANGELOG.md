@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="2.3.13"></a>
+## 2.3.13 (2025-02-14)
+
+### Bug Fixes
+
+* **database:** added cache for connection strings and fixed open connection with use database
+* **database:** upgraded core packages
+
 <a name="2.3.12"></a>
 ## 2.3.12 (2025-02-13)
 
