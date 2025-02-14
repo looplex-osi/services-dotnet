@@ -133,10 +133,17 @@ public class SqlDatabaseService(SqlConnection connection) : ISqlDatabaseService
         return connection.BeginTransaction();
     }
 
-    private Task UseDatabaseIfPossible()
+    private async Task UseDatabaseIfPossible()
     {
-        return !string.IsNullOrEmpty(DatabaseName)
-            ? connection.ExecuteAsync($"USE @DatabaseName", new { DatabaseName })
-            : Task.CompletedTask;
+        if (!string.IsNullOrEmpty(DatabaseName))
+        {
+            string query = "SELECT name FROM sys.databases WHERE name = @DatabaseName";
+            var databaseName = await connection.QueryFirstOrDefaultAsync<string>(query, new { DatabaseName });
+
+            if (string.IsNullOrEmpty(databaseName))
+                throw new ArgumentException("INVALID_DATABASE_NAME", nameof(DatabaseName));
+
+            await connection.ExecuteAsync($"USE [{databaseName}]");
+        }
     }
 }
