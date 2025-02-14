@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.5.0" />
-    <PackageReference Include="Looplex.DotNet.Core.Common" Version="4.0.6" />
+    <PackageReference Include="Looplex.DotNet.Core.Common" Version="4.0.7" />
     <PackageReference Include="Looplex.DotNet.Middlewares.ApiKeys" Version="3.0.4" />
     <PackageReference Include="ScimPatch" Version="2.0.3" />
   </ItemGroup>

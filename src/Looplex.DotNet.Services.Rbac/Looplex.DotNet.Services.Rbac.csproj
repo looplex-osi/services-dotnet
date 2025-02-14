@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="Casbin.NET" Version="2.12.0" />
-    <PackageReference Include="Looplex.DotNet.Core.Application" Version="4.0.6" />
+    <PackageReference Include="Looplex.DotNet.Core.Application" Version="4.0.7" />
   </ItemGroup>
 
 </Project>
