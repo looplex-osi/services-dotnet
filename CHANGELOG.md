@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="2.3.15"></a>
+## 2.3.15 (2025-02-21)
+
+### Bug Fixes
+
+* **database:** upgrade core packages
+
 <a name="2.3.14"></a>
 ## 2.3.14 (2025-02-14)
 
