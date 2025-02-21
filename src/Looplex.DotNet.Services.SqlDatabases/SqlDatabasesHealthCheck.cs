@@ -1,12 +1,13 @@
 using Looplex.DotNet.Core.Application.Abstractions.Providers;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Looplex.DotNet.Services.SqlDatabases;
 
 public class SqlDatabasesHealthCheck(
     IHttpContextAccessor httpContextAccessor,
-    ISqlDatabaseProvider sqlDatabaseProvider) : IHealthCheck
+    IDbConnectionProvider dbConnectionProvider) : IHealthCheck
 {
     const string LooplexTenantKeyHeader = "X-looplex-tenant";
         
@@ -22,9 +23,11 @@ public class SqlDatabasesHealthCheck(
             {
                 return HealthCheckResult.Unhealthy($"Missing {LooplexTenantKeyHeader} header.");
             }
-            
-            using var db = await sqlDatabaseProvider.GetDatabaseAsync(tenant.ToString());
-            await db.OpenConnectionAsync();
+            var (dbConnection, databaseName) = await dbConnectionProvider.GetConnectionAsync(tenant.ToString());
+
+            await using var conn = (SqlConnection) dbConnection;
+            await conn.OpenAsync(cancellationToken);
+            await conn.ChangeDatabaseAsync(databaseName, cancellationToken);
 
             return HealthCheckResult.Healthy($"Sql database for {tenant} is healthy.");
         }

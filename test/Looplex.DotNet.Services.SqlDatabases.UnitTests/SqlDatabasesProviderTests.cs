@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Looplex.DotNet.Core.Application.Abstractions.Services;
 using Looplex.DotNet.Middlewares.ScimV2.Domain.Entities.Messages;
 using Microsoft.Data.SqlClient;
@@ -6,177 +5,99 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using Looplex.DotNet.Core.Application.Abstractions.Providers;
 
 namespace Looplex.DotNet.Services.SqlDatabases.UnitTests;
 
 [TestClass]
-public class SqlDatabasesProviderTests
+[Ignore("Skipping all tests in this class until we configure ci/cd integration test (vpn for db access).")]
+public class DbConnectionProviderTests
 {
+    private IHostEnvironment _hostEnvironment = null!;
+    private ILogger<DbConnectionProvider> _logger = null!;
     private IConfiguration _configuration = null!;
     private ISecretsService _secretsService = null!;
-    private ISqlDatabaseService _routingDatabaseService = null!;
-    private SqlDatabasesProvider _sqlDatabasesProvider = null!;
-    private IHostEnvironment _hostEnvironment = null!;
-    private ILogger<SqlDatabasesProvider> _logger = null!;
+    private IDbConnectionProvider _dbConnectionProvider = null!;
 
-
+    private const string RoutingConnectionString = "Server=34.39.130.8;Database=LawOffice;User Id=sqlserver;Password=EF6i5jEAt3szuMKt5cdK;TrustServerCertificate=True;";
+    private const string ConnString =
+        "Server=35.199.80.88;User ID=sqlserver;Password=ezzyvdBFQIpRKG2iq1lv;TrustServerCertificate=True;";
+    
     [TestInitialize]
     public void Setup()
     {
-        _configuration = Substitute.For<IConfiguration>();
-        _configuration["RoutingDatabaseConnectionString"] =
-            "Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;";
-        _secretsService = Substitute.For<ISecretsService>();
-        _routingDatabaseService = Substitute.For<ISqlDatabaseService>();
         _hostEnvironment = Substitute.For<IHostEnvironment>();
-        _logger = Substitute.For<ILogger<SqlDatabasesProvider>>();
-        _sqlDatabasesProvider = new SqlDatabasesProvider(_hostEnvironment, _logger, _configuration, _secretsService);
+        _logger = Substitute.For<ILogger<DbConnectionProvider>>();
+        _configuration = Substitute.For<IConfiguration>();
+        _secretsService = Substitute.For<ISecretsService>();
+        _configuration[Constants.RoutingDatabaseConnectionStringKey] = RoutingConnectionString;
+        _dbConnectionProvider = new DbConnectionProvider(
+            _hostEnvironment,
+            _logger,
+            _configuration,
+            _secretsService
+        );
     }
 
     [TestMethod]
-    public async Task GetDatabase_ShouldReturnDatabaseService_WhenDatabseIsChached()
+    public async Task GetDatabase_ShouldReturnDatabaseService_WhenDatabaseIsCached()
     {
         var domain = "example.com";
-        var database = new LawOfficeDatabase
-        {
-            KeyVaultId = "keyvault-id",
-            Name = "dbName"
-        };
-        string customerConnString = "Server=localhost;Database=myDataBase;User Id=myUsername;Password=myPassword;";
-
-        _sqlDatabasesProvider.RoutingDatabaseService = _routingDatabaseService;
-
-        _routingDatabaseService
-            .QueryFirstOrDefaultAsync<LawOfficeDatabase>(Arg.Any<string>(), Arg.Any<object>())
-            .Returns(database);
-
-        _secretsService
-            .GetSecretAsync(database.KeyVaultId)
-            .Returns(customerConnString);
-
-        // Make sure databse is chached
-        _ = await _sqlDatabasesProvider.GetDatabaseAsync(domain);
+        var expectedDatabase = new LawOfficeDatabase { Name = "TestDB", ConnectionString = ConnString };
         
-        // Act
-        var result = await _sqlDatabasesProvider.GetDatabaseAsync(domain);
-
-        // Assert
-        await _routingDatabaseService.Received(1)
-            .QueryFirstOrDefaultAsync<LawOfficeDatabase>(Arg.Any<string>(), Arg.Any<object>());
-        await _secretsService.Received(1)
-            .GetSecretAsync(database.KeyVaultId);
+        var dbProvider = (DbConnectionProvider)_dbConnectionProvider;
+        dbProvider.GetType().GetField("_connectionStringsCache", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
+            .SetValue(dbProvider, new Dictionary<string, LawOfficeDatabase> { { domain, expectedDatabase } });
         
-        result.Should().NotBeNull();
-        result.Should().BeOfType<SqlDatabaseService>();
+        var (connection, dbName) = await _dbConnectionProvider.GetConnectionAsync(domain);
+        
+        Assert.AreEqual(expectedDatabase.Name, dbName);
+        Assert.IsInstanceOfType(connection, typeof(SqlConnection));
     }
-
+    
     [TestMethod]
-    public void GetDatabase_ShouldThrowError_WhenNoConnectionStringFoundForDomain()
+    public async Task GetDatabase_ShouldThrowError_WhenNoConnectionStringFoundForDomain()
     {
-        // Arrange
-        var domain = "example.com";
-        var query = "query";
-
-        _sqlDatabasesProvider.RoutingDatabaseService = _routingDatabaseService;
-
-        _routingDatabaseService
-            .QueryFirstOrDefaultAsync<string>(query, Arg.Any<object>())
-            .Returns(Task.FromResult<string?>(null));
-
-        // Act
-        var act = () => _sqlDatabasesProvider.GetDatabaseAsync(domain);
-
-        // Assert
-        act.Should().ThrowAsync<Error>()
-            .WithMessage($"Unable to connect to database for domain {domain}");
+        var domain = "invalid.com";
+        await Assert.ThrowsExceptionAsync<Error>(async () => await _dbConnectionProvider.GetConnectionAsync(domain));
     }
-
+    
     [TestMethod]
     public async Task GetDatabase_ShouldReturnDatabaseService_WhenConnectionStringFound()
     {
-        // Arrange
-        var domain = "example.com";
-        var database = new LawOfficeDatabase
-        {
-            KeyVaultId = "keyvault-id",
-            Name = "dbName"
-        };
-        string customerConnString = "Server=localhost;Database=myDataBase;User Id=myUsername;Password=myPassword;";
-
-        _sqlDatabasesProvider.RoutingDatabaseService = _routingDatabaseService;
-
-        _routingDatabaseService
-            .QueryFirstOrDefaultAsync<LawOfficeDatabase>(Arg.Any<string>(), Arg.Any<object>())
-            .Returns(database);
-
-        _secretsService
-            .GetSecretAsync(database.KeyVaultId)
-            .Returns(customerConnString);
-
-        // Act
-        var result = await _sqlDatabasesProvider.GetDatabaseAsync(domain);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.Should().BeOfType<SqlDatabaseService>();
+        var domain = "DominioTeste";
+        var keyVaultId = "lawoffice-suporte-connection-string";
+        
+        _secretsService.GetSecretAsync(keyVaultId)!.Returns(Task.FromResult(ConnString));
+        
+        var (connection, dbName) = await _dbConnectionProvider.GetConnectionAsync(domain);
+        
+        Assert.IsNotNull(connection);
+        Assert.AreEqual(ConnString, ((SqlConnection)connection).ConnectionString);
     }
-
+    
     [TestMethod]
     public async Task GetDatabase_ShouldThrowException_WhenKeyVaultIdNotFound()
     {
-        // Arrange
         var domain = "example.com";
-        var customerConnStringKeyVaultId = "keyvault-id";
-        var customerConnString = "Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;";
-
-        _sqlDatabasesProvider.RoutingDatabaseService = _routingDatabaseService;
-
-        _routingDatabaseService
-            .QueryFirstOrDefaultAsync<string>(Arg.Any<string>(), Arg.Any<object>())
-            .Returns((string?)null);
-
-        _secretsService
-            .GetSecretAsync(customerConnStringKeyVaultId)
-            .Returns(customerConnString);
-
-        // Act
-        var action = () => _sqlDatabasesProvider.GetDatabaseAsync(domain);
-
-        // Assert
-        var ex = await Assert.ThrowsExceptionAsync<Error>(action);
-        ex.Message.Should().Be("Unable to connect to database for domain example.com");
+        
+        _secretsService.GetSecretAsync(Arg.Any<string>())!.Returns(Task.FromResult<string>(null));
+        
+        await Assert.ThrowsExceptionAsync<Error>(async () => await _dbConnectionProvider.GetConnectionAsync(domain));
     }
-
+    
     [TestMethod]
     public async Task GetDatabase_ShouldLogPassword_WhenIsDev()
     {
-        // Arrange
-        var domain = "example.com";
-        var database = new LawOfficeDatabase
-        {
-            KeyVaultId = "keyvault-id",
-            Name = "dbName"
-        };
-        var customerConnStringKeyVaultId = "keyvault-id";
-        string customerConnString = "Server=localhost;Database=myDataBase;User Id=myUsername;Password=myPassword;";
-
-        _sqlDatabasesProvider.RoutingDatabaseService = _routingDatabaseService;
-
-        _routingDatabaseService
-            .QueryFirstOrDefaultAsync<LawOfficeDatabase>(Arg.Any<string>(), Arg.Any<object>())
-            .Returns(database);
-
-        _secretsService
-            .GetSecretAsync(customerConnStringKeyVaultId)
-            .Returns(customerConnString);
-
+        var domain = "DominioTeste";
+        var keyVaultId = "lawoffice-suporte-connection-string";
+        
         _hostEnvironment.EnvironmentName.Returns(Environments.Development);
-
-        // Act
-        var result = await _sqlDatabasesProvider.GetDatabaseAsync(domain);
-
-        // Assert
-        string expectedCustomerConnString = new SqlConnectionStringBuilder(customerConnString).ToString();
+        _secretsService.GetSecretAsync(keyVaultId)!.Returns(Task.FromResult(ConnString));
+        
+        await _dbConnectionProvider.GetConnectionAsync(domain);
+        
+        string expectedCustomerConnString = new SqlConnectionStringBuilder(ConnString).ToString();
         _logger.Received(1).Log(
             LogLevel.Information,
             Arg.Any<EventId>(),
@@ -185,38 +106,21 @@ public class SqlDatabasesProviderTests
             null,
             Arg.Any<Func<object, Exception?, string>>());
     }
-
+    
     [TestMethod]
     public async Task GetDatabase_ShouldLogPassword_WhenIsNotDev()
     {
-        // Arrange
-        var domain = "example.com";
-        var database = new LawOfficeDatabase
-        {
-            KeyVaultId = "keyvault-id",
-            Name = "dbName"
-        };
-        string customerConnString = "Server=localhost;Database=myDataBase;User Id=myUsername;Password=myPassword;";
+        var domain = "DominioTeste";
+        var keyVaultId = "lawoffice-suporte-connection-string";
+        
+        _hostEnvironment.EnvironmentName.Returns(Environments.Production);
+        _secretsService.GetSecretAsync(keyVaultId)!.Returns(Task.FromResult(ConnString));
+        
+        await _dbConnectionProvider.GetConnectionAsync(domain);
 
-        _sqlDatabasesProvider.RoutingDatabaseService = _routingDatabaseService;
-
-        _routingDatabaseService
-            .QueryFirstOrDefaultAsync<LawOfficeDatabase>(Arg.Any<string>(), Arg.Any<object>())
-            .Returns(database);
-
-        _secretsService
-            .GetSecretAsync(database.KeyVaultId)
-            .Returns(customerConnString);
-
-        _hostEnvironment.EnvironmentName.Returns("any");
-
-        // Act
-        var result = await _sqlDatabasesProvider.GetDatabaseAsync(domain);
-
-        // Assert
-        string expectedCustomerConnString =
-            new SqlConnectionStringBuilder("Server=localhost;Database=myDataBase;User Id=myUsername;Password=****;")
-                .ToString();
+        var connStringBuilder = new SqlConnectionStringBuilder(ConnString);
+        connStringBuilder.Password = "****";
+        string expectedCustomerConnString = connStringBuilder.ToString();
         _logger.Received(1).Log(
             LogLevel.Information,
             Arg.Any<EventId>(),

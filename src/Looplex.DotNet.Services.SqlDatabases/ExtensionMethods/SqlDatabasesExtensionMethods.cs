@@ -7,7 +7,7 @@ public static class SqlDatabasesExtensionMethods
 {
     public static void AddSqlDatabaseServices(this IServiceCollection services)
     {
-        services.AddSingleton<ISqlDatabaseProvider, SqlDatabasesProvider>();
+        services.AddSingleton<IDbConnectionProvider, DbConnectionProvider>();
     }
     
     public static void AddRoutingDatabaseHealthChecks(this IServiceCollection services, string name = "RoutingDatabase")

@@ -1,3 +1,4 @@
+using System.Data;
 using System.Net;
 using Looplex.DotNet.Core.Application.Abstractions.Providers;
 using Looplex.DotNet.Core.Application.Abstractions.Services;
@@ -9,43 +10,41 @@ using Microsoft.Extensions.Logging;
 
 namespace Looplex.DotNet.Services.SqlDatabases;
 
-public class SqlDatabasesProvider(
+public class DbConnectionProvider(
     IHostEnvironment hostEnvironment,
-    ILogger<SqlDatabasesProvider> logger,
+    ILogger<DbConnectionProvider> logger,
     IConfiguration configuration,
-    ISecretsService secretsService) : ISqlDatabaseProvider
+    ISecretsService secretsService) : IDbConnectionProvider
 {
-    private ISqlDatabaseService? _routingDatabaseService;
+    private SqlConnection? _routingSqlConnection;
 
     private readonly IDictionary<string, LawOfficeDatabase> _connectionStringsCache = new Dictionary<string, LawOfficeDatabase>();
 
-    internal ISqlDatabaseService RoutingDatabaseService
+    internal SqlConnection RoutingSqlConnection
     {
-        private get
+        get
         {
-            if (_routingDatabaseService == null)
+            if (_routingSqlConnection == null)
             {
                 var routingConnString = configuration[Constants.RoutingDatabaseConnectionStringKey];
 
-                var connection = new SqlConnection(routingConnString);
-                _routingDatabaseService = new SqlDatabaseService(connection);
+                _routingSqlConnection = new SqlConnection(routingConnString);
             }
 
-            return _routingDatabaseService;
+            return _routingSqlConnection;
         }
-        set => _routingDatabaseService = value;
+        set => _routingSqlConnection = value;
     }
 
-    public async Task<ISqlDatabaseService> GetDatabaseAsync(string domain)
+    public async Task<(IDbConnection, string)> GetConnectionAsync(string domain)
     {
         var database = _connectionStringsCache.TryGetValue(domain, out var value)
             ? value
             : await GetDatabaseUsingRoutingDatabaseAsync(domain);
 
+        var databaseName = database.Name!;
         var connection = new SqlConnection(database.ConnectionString);
-        var db = new SqlDatabaseService(connection);
-        db.DatabaseName = database.Name;
-        return db;
+        return (connection, databaseName);
     }
 
     private async Task<LawOfficeDatabase> GetDatabaseUsingRoutingDatabaseAsync(string domain)
@@ -62,10 +61,25 @@ public class SqlDatabasesProvider(
                     c.domain = @Domain
                 AND c.status = @Status
         ";
-        var database = await RoutingDatabaseService
-            .QueryFirstOrDefaultAsync<LawOfficeDatabase>(query,
-                new { Domain = domain, Status = (int)CustomerStatus.Active });
+        
+        if (RoutingSqlConnection.State == ConnectionState.Closed)
+            await RoutingSqlConnection.OpenAsync(CancellationToken.None);
+        
+        await using var cmd = new SqlCommand(query, RoutingSqlConnection);
+        cmd.Parameters.Add("@Domain", SqlDbType.NVarChar).Value = domain;
+        cmd.Parameters.Add("@Status", SqlDbType.Int).Value = (int)CustomerStatus.Active;
 
+        await using var reader = await cmd.ExecuteReaderAsync();
+        LawOfficeDatabase? database = null;
+        if (await reader.ReadAsync())
+        {
+            database = new LawOfficeDatabase
+            {
+                Name = reader["Name"].ToString(),
+                KeyVaultId = reader["KeyVaultId"] != DBNull.Value ? reader["KeyVaultId"].ToString() : null
+            };
+        }
+        
         if (string.IsNullOrEmpty(database?.KeyVaultId) || string.IsNullOrEmpty(database?.Name))
         {
             logger.LogError("Unable to connect to database for tenant {Tenant}. Key vault id is null or empty",
